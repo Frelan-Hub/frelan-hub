@@ -1,0 +1,92 @@
+# Business / Strategy Debate Meeting — the equitable successor of
+# frelan_debate.yaml: symmetric peer roles instead of fixed proposer/critic,
+# duties reciprocal, turn order alternates per phase.
+
+id: frelan-strategy-debate-001
+name: Business / Strategy Debate
+objective: >
+  Reach a defensible recommendation on the strategic decision posed by the
+  Founder at session start.
+metadata:
+  author: FRELAN
+  version: "1.0"
+  meeting_type: strategy_debate
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: framing
+    name: Decision Framing
+    objective: Agree what is actually being decided and by what criteria.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Frame the decision: the options as you see them, the criteria that should
+      decide it, and the constraints that bound it. Do not argue a position yet.
+    max_rounds: 1
+
+  - id: positions
+    name: Positions
+    objective: Each peer states its position with reasoning.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      State your position on the framed decision in no more than five concise
+      points. Do not rebut the other peer yet.
+    max_rounds: 1
+
+  - id: rebuttal
+    name: Reciprocal Rebuttal
+    objective: Peers challenge and refine each other's positions.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Respond directly to the strongest point the other peer made. Concede
+      where they are right; sharpen where they are wrong. Both peers carry the
+      same duty — challenge and defend in the same turn.
+    max_rounds: 3
+
+  - id: convergence
+    name: Convergence
+    objective: Align on a recommendation or crystallize the trade-off.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      State the recommendation you can both stand behind, or crystallize the
+      one trade-off that separates you so the Founder can decide it.
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged only when both peers have substantially aligned or the
+    trade-off is clear enough to recommend.
+  escalation_note: >
+    Escalate if the peers are deadlocked on a point that needs the Founder's
+    domain judgement.
+
+outputs:
+  - id: recommendation
+    title: Strategy Recommendation
+    description: The synthesized recommendation produced at convergence.
+    filename: recommendation.md

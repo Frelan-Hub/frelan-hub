@@ -1,0 +1,14 @@
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true
+
+# Control-plane palette. The bronze is taken from the FRELAN mark; the ground is
+# kept near-black so live status colours read as signal rather than decoration.
+[theme]
+base = "dark"
+primaryColor = "#C08A52"
+backgroundColor = "#0B0E13"
+secondaryBackgroundColor = "#141922"
+textColor = "#E4E7EC"

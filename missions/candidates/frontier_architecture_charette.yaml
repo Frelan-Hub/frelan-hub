@@ -1,0 +1,305 @@
+# Frontier Architecture Charette — evidence-driven engineering recommendation
+# before any implementation begins. Not a brainstorm: constructive disagreement,
+# rigorous critique, and verification are required; every recommendation must
+# survive challenge before entering the final architecture.
+# Equitable by design: symmetric peer roles, duties rotate per phase, and turn
+# order alternates so no engine permanently anchors or closes the discussion.
+# Spec phases 1-12 are contract phases; Phase 13 (Final Recommendation) is the
+# runtime's final synthesis, written to recommendation.md at convergence.
+#
+# v2.0 — persistent-register protocol (architecture review R1-R7, all YAML-only):
+# the meeting maintains one canonical registers file (charette/registers.md)
+# emitted as a harvested artifact, so decisions, assumptions, risks, and
+# requirements survive the runtime's bounded transcript window and reach the
+# final synthesis intact. The LAST speaker of each phase is that phase's
+# reconciler and re-emits the complete updated file (full replacement) —
+# rotation makes reconciliation duty alternate between engines.
+#
+# Set the actual mission/topic via the startup Topic Injection prompt.
+
+id: frelan-frontier-architecture-charette-001
+name: Frontier Architecture Charette
+objective: >
+  Produce the highest-quality, evidence-based engineering recommendation for
+  the mission described by the Founder at session start — before any
+  implementation begins. Prioritize evidence over confidence, architecture
+  before implementation, explicit trade-off analysis, provider neutrality,
+  long-term maintainability, and consensus through evidence rather than
+  majority opinion. Each peer must cover the full bench of specialist
+  perspectives as each phase demands them — architect (software, systems,
+  product, backend, frontend, infrastructure, AI runtime, UX), technical lead,
+  security architect, performance engineer, QA lead, verification engineer,
+  risk analyst, cost analyst, documentation lead, and devil's advocate —
+  keeping each perspective's concerns distinct even when one peer voices
+  several.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    The heavyweight pre-implementation review — twelve phases covering
+    architecture, security, performance, risk, cost, and QA. For a
+    substantial build where getting it wrong is expensive.
+  author: FRELAN
+  version: "2.0"
+  meeting_type: frontier_architecture_charette
+  template_version: "2.0"
+  format: "2 - Independent Proposals, Cross-Challenge, Merge (extended)"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+  - id: architecture
+    description: Design system structure, boundaries, and technology choices.
+  - id: implementation.code
+    description: Ground plans in implementable code and data structures.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, architecture, implementation.code]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, architecture, implementation.code]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: mission_intake
+    name: Mission Intake
+    objective: Establish a shared understanding of the mission and seed the canonical registers.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      State your understanding of the mission objective, desired outcome,
+      scope, constraints, assumptions, success criteria, stakeholders,
+      deliverables, timeline, budget (if applicable), and technical
+      limitations. Flag anything ambiguous that needs the Founder's
+      clarification. No design discussion yet.
+      REGISTER PROTOCOL (governs the whole meeting): the meeting maintains ONE
+      canonical registers file. The LAST speaker of every phase re-emits it,
+      complete and updated, as a single fenced markdown block whose FIRST line
+      is exactly "<!-- filename: charette/registers.md -->" — this is a full
+      replacement, never a diff, and it must contain no nested code fences.
+      Keep it compact: one line per entry, telegraphic wording; it is re-read
+      on every future turn. IDs are permanent — D-001 decisions, ASM-001
+      assumptions, RISK-001 risks, REQ-001 requirements, ALT-001 architecture
+      alternatives; never renumber or reuse an ID; retired entries are marked
+      Rejected/Retired, not deleted. Every entry carries an evidence label:
+      VERIFIED (checked against a source), SUPPORTED (strong indirect
+      evidence), ASSUMED (plausible, unchecked), SPECULATIVE (guess), or
+      UNKNOWN (needs investigation). The last speaker this phase creates the
+      file with these conventions stated at the top, four sections (Decisions,
+      Assumptions, Risks, Requirements), and the initial ASM/RISK entries from
+      this discussion. Earlier speakers propose entries in prose using the
+      next free IDs.
+    max_rounds: 1
+
+  - id: problem_framing
+    name: Problem Framing
+    objective: Define the real problem and guard against solving the wrong one.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Define the actual problem and the underlying problem beneath it. Name
+      the problems that should NOT be solved here, the risks of solving the
+      wrong problem, and the unknowns that require validation before design —
+      record each unknown as an ASM entry labelled UNKNOWN. Reference register
+      entries by ID, not by restating them. Last speaker re-emits the complete
+      updated charette/registers.md as established.
+    max_rounds: 1
+
+  - id: context_discovery
+    name: Context Discovery
+    objective: Gather all context the design depends on.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Enumerate the context the design depends on: existing architecture and
+      documentation, current technologies, existing APIs, SDKs, frameworks,
+      constraints, runtime environment, browser capabilities, external
+      integrations, security requirements, and compliance considerations.
+      Attach an evidence label to every significant claim (VERIFIED with its
+      source, SUPPORTED, ASSUMED, SPECULATIVE, or UNKNOWN); anything below
+      SUPPORTED that a decision will rest on becomes an ASM entry, and say
+      how it could be checked. Last speaker re-emits the complete updated
+      charette/registers.md.
+    max_rounds: 1
+
+  - id: workspace_preparation
+    name: Workspace Preparation
+    objective: Recommend everything required before development begins.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Recommend the SDKs, APIs, frameworks, libraries, documentation, browser
+      tooling, development tools, skills, plugins, connectors, MCP servers,
+      environment configuration, repository structure, coding standards,
+      testing frameworks, and CI/CD setup required before development begins.
+      These recommendations are advisory: every item must carry a clear
+      justification and an evidence label, and speculative items should be
+      omitted. Record each accepted recommendation as a D entry tracing to the
+      ASM/REQ entries that justify it. Last speaker re-emits the complete
+      updated charette/registers.md.
+    max_rounds: 1
+
+  - id: assumption_challenge
+    name: Assumption Challenge
+    objective: Surface and disposition every assumption underlying the mission.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Work through the Assumptions section of the register entry by entry, and
+      add any hidden, weak, missing, invalid, or high-risk assumptions still
+      absent — your own and the other peers'. Disposition every ASM entry
+      explicitly: Accepted, Revised, Rejected, or Deferred for validation,
+      with a one-line rationale. Revisit any D entry (including workspace
+      recommendations) that rested on an assumption just rejected or revised,
+      and mark it accordingly. Last speaker re-emits the complete updated
+      charette/registers.md.
+    max_rounds: 1
+
+  - id: architecture_charette
+    name: Architectural Charette
+    objective: Independent proposals first, then open debate; reject inferior options with evidence.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      ROUND 1 — independent proposals: present your candidate architecture as
+      a new ALT entry (components, boundaries, stack, key trade-offs) WITHOUT
+      referencing, comparing against, or building on any other peer's proposal
+      in this phase; anchoring on an earlier speaker forfeits the value of
+      independence. ROUND 2 — open charette: now engage the other proposals —
+      compare approaches, evaluate trade-offs, challenge unnecessary
+      complexity, probe scalability, maintainability, and future
+      extensibility, and propose improvements. Constructive disagreement is
+      expected: reject inferior options with evidence, not preference, and do
+      not converge prematurely. Last speaker of each round re-emits the
+      complete updated charette/registers.md.
+    max_rounds: 2
+
+  - id: proposal_critique
+    name: Proposal Critique
+    objective: Subject every surviving proposal to full-spectrum critique and scoring.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Critique each surviving ALT entry, then score it 1-5 against ten
+      criteria: simplicity, maintainability, scalability, performance,
+      security, cost, developer experience, AI collaboration, extensibility,
+      testability — each score with a one-line rationale, recorded under the
+      ALT's entry in the register. Weak proposals must be revised or rejected
+      — say which, and why. Then defend or amend your own proposal where it
+      was challenged, conceding where the critique is right. Last speaker of
+      each round re-emits the complete updated charette/registers.md with the
+      score tables reconciled (disagreeing scores are kept side by side, not
+      averaged away).
+    max_rounds: 2
+
+  - id: alternative_exploration
+    name: Alternative Exploration
+    objective: Document the viable alternatives and why each was accepted or rejected.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      For each viable alternative approach (including ones already set aside),
+      confirm its ALT entry documents advantages, disadvantages, risks,
+      complexity, cost, maintainability, performance, and suitability — and an
+      explicit Accepted or Rejected status with rationale as a D entry.
+      Rejected ideas stay on the record with their rationale; no ALT may be
+      left without a disposition. Last speaker re-emits the complete updated
+      charette/registers.md.
+    max_rounds: 1
+
+  - id: risk_assessment
+    name: Risk Assessment
+    objective: Produce a comprehensive risk register with mitigations.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Complete the Risks section: technical, product, operational, security,
+      performance, dependency, AI-provider, cost, schedule, and unknown risks.
+      Every RISK entry carries severity, likelihood, a concrete mitigation
+      strategy, and traces to the D/ALT/ASM entries it arises from. Merge and
+      de-duplicate against existing entries rather than restating them. Last
+      speaker re-emits the complete updated charette/registers.md.
+    max_rounds: 1
+
+  - id: requirements_engineering
+    name: Requirements Engineering
+    objective: Produce one canonical, testable, traceable requirements register.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      First speaker: draft the REQ entries — functional, non-functional,
+      architecture, security, performance, scalability, reliability, testing,
+      deployment, monitoring, documentation, operational, maintenance, and
+      future-expansion requirements; each one clear, testable, and tracing to
+      the D/ASM/RISK entries that motivate it. Second speaker: do NOT produce
+      a parallel specification — reconcile: challenge, correct, fill gaps, and
+      merge into ONE canonical Requirements section, then re-emit the complete
+      updated charette/registers.md.
+    max_rounds: 1
+
+  - id: execution_planning
+    name: Execution Planning
+    objective: Create the implementation strategy; no implementation begins without it.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      First speaker: draft the execution plan — project phases, work breakdown
+      structure, milestones, dependencies, task sequencing, validation gates,
+      quality gates, architecture checkpoints, review checkpoints, acceptance
+      criteria, and the Definition of Done — with WBS items referencing the
+      REQ and RISK entries they satisfy or mitigate. Every ASM entry still
+      marked Deferred and every UNKNOWN must map to a validation task,
+      prototype, spike, or experiment in the plan, each with an explicit exit
+      criterion; nothing unresolved may lack a planned action. Second speaker:
+      reconcile into ONE canonical plan (no parallel plan), record it as D
+      entries plus a Plan section appended to the registers file, and re-emit
+      the complete updated charette/registers.md.
+    max_rounds: 1
+
+  - id: consensus_formation
+    name: Consensus Formation
+    objective: Reach consensus through evidence, or document the competing recommendations.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      State explicitly, referencing register IDs rather than prose summaries:
+      your agreements, remaining disagreements, accepted trade-offs,
+      outstanding risks, and a confidence level (with its evidence label) for
+      the recommended architecture. Consensus is achieved through evidence,
+      not voting — if it cannot be reached, document the competing
+      recommendations as clearly-scoped alternatives and explain why, rather
+      than forcing convergence. Last speaker performs the final reconciliation
+      pass — every entry dispositioned, every trace intact — and re-emits the
+      definitive charette/registers.md.
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 2
+  max_rounds: 16
+  convergence_note: >
+    Mark Converged when the peers endorse one recommendation on evidence, or
+    the remaining disagreement is documented competing recommendations with
+    explicit trade-offs the Founder can decide between. The registers file
+    should be fully reconciled (no undispositioned entries) at convergence.
+  escalation_note: >
+    Escalate when a mission ambiguity, business constraint, or unvalidated
+    high-risk assumption blocks the recommendation and needs the Founder's
+    judgement.
+
+outputs:
+  - id: recommendation
+    title: Final Recommendation
+    description: >
+      The authoritative implementation baseline, built from the canonical
+      registers file (charette/registers.md) rather than discussion memory
+      alone: executive summary, recommended solution with supporting evidence
+      and evidence labels, architecture overview citing the winning ALT entry
+      and its scores, recommended technologies, workspace preparation plan
+      (SDKs, APIs, skills, plugins, connectors, documentation), project
+      structure, technical requirements (REQ entries), risks (RISK entries
+      with mitigations), validation strategy covering every deferred
+      assumption, testing strategy, deployment strategy, future roadmap, and
+      immediate next actions. Every recommendation must trace to its
+      originating REQ/D/ASM/RISK entries by ID.
+    filename: recommendation.md

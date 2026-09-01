@@ -1,0 +1,111 @@
+# Premortem — Inversion (FORMATS.md format 5).
+# Assume the plan has already failed, work backwards to the causes, then
+# mitigate. Equitable by design: symmetric peer roles, turn order alternates.
+# Set the plan under examination via Topic Injection and Reference Files.
+
+id: frelan-premortem-001
+name: Premortem
+objective: >
+  Assume the plan described by the Founder at session start has already failed,
+  identify the causes, and produce a risk register with mitigations.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For stress-testing a plan you already intend to follow. The peers assume
+    it has failed and work backwards, ending in a risk register with
+    mitigations.
+  author: FRELAN
+  version: "1.0"
+  template_version: "1.0"
+  meeting_type: premortem
+  format: "5 - Inversion"
+  peer_scoring: "true"
+
+capabilities:
+  - id: risk.analysis
+    description: Identify failure modes, their causes, likelihood, and impact.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [risk.analysis, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [risk.analysis, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: obituary
+    name: Independent Failure Account
+    objective: Each peer writes the failure story alone, before comparing notes.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      It is twelve months from now and this plan failed badly. Write the account
+      of how: what went wrong, in what order, and what everyone believed at the
+      time that turned out to be false. Write it as history, not as a warning —
+      no hedging, no "might". Do not reference the other peer.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: causes
+    name: Root Causes
+    objective: Reduce both accounts to distinct root causes.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Reduce both failure accounts to distinct root causes. For each, state the
+      earliest point it could have been detected and what signal would have
+      shown it. Name any cause only one of you found, and say whether you now
+      accept it.
+    max_rounds: 2
+
+  - id: challenge
+    name: Likelihood & Blind Spots
+    objective: Test each other's causes and surface what both of you missed.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Challenge the other peer's causes step by step, not just their conclusion:
+      which link in the chain is weakest, which is speculation, which is already
+      mitigated by the plan. Then name at least one failure mode you both
+      missed. Do not converge merely because the other peer agreed with you —
+      state clearly where you still disagree and why.
+    max_rounds: 2
+
+  - id: register
+    name: Risk Register
+    objective: Produce the register with mitigations and owners of the decision.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Produce the Risk Register as a table — Risk, Root cause, Early signal,
+      Likelihood (H/M/L), Impact (H/M/L), Mitigation, Decision needed from the
+      Founder — ordered by Likelihood x Impact. Follow it with two sections:
+      "Cheapest three mitigations" and "Risks we could not size, and why".
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged when every root cause carries a mitigation or an explicit
+    accepted-risk note, and the register is ordered.
+  escalation_note: >
+    Escalate when a failure mode depends on a constraint, budget, or commitment
+    only the Founder can confirm.
+
+outputs:
+  - id: recommendation
+    title: Risk Register
+    description: Root causes, early signals, likelihood/impact, and mitigations.
+    filename: recommendation.md

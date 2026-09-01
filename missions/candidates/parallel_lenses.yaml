@@ -1,0 +1,132 @@
+# Parallel Lenses — one subject examined through one shared lens per phase.
+#
+# The format is PROPOSED, not adopted: it is not one of the six numbered
+# skeletons in FORMATS.md. Its provenance (de Bono's parallel-thinking method)
+# and the reason it is structurally distinct are in MEETING-FORMAT-RESEARCH.md;
+# it enters the numbered set only after the runs required by
+# MISSION-LIBRARY-RESOLUTION.md §10.
+#
+# What makes it distinct: every other format in the library separates the peers
+# by POSITION — they propose differently, score differently, attack each other.
+# Here both peers always face the same direction, and it is the DIRECTION that
+# changes between phases. There is no opposed position at any point; the value
+# comes from exhausting one mode of thinking before the next begins.
+#
+# Set the subject via the startup Topic Injection prompt.
+
+id: frelan-parallel-lenses-001
+name: Parallel Lenses
+objective: >
+  Examine the subject described by the Founder at session start through one
+  shared lens at a time, and end with a structured assessment.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For examining a subject from every side without forcing a decision. All
+    peers look through one shared lens at a time — facts, risks, benefits,
+    alternatives.
+  author: FRELAN
+  version: "1.0"
+  template_version: "1.0"
+  meeting_type: parallel_lenses
+  format: "proposed - Parallel Lenses (see MEETING-FORMAT-RESEARCH.md)"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: ideation
+    description: Generate many distinct options without prematurely judging them.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, ideation, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, ideation, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: facts
+    name: Lens 1 — What Is Known
+    objective: Establish the factual base, with inference labelled as inference.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      This phase is facts only. State what is established about the subject and
+      label every line as FACT (checkable, with its source) or INFERENCE (yours,
+      with what it rests on). Name what you would need to know and do not.
+      No opinions, no risks, no ideas — those phases come later.
+    max_rounds: 1
+
+  - id: risks
+    name: Lens 2 — What Could Go Wrong
+    objective: Exhaust the downside before any benefit is discussed.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      This phase is caution only. Both of you argue the downside: risks, failure
+      modes, costs, second-order effects, what breaks at scale. Do not balance
+      it with an upside and do not defend the subject — the balancing happens in
+      the final phase. Add to the other peer's risks rather than rebutting them.
+    max_rounds: 2
+
+  - id: benefits
+    name: Lens 3 — What Could Go Right
+    objective: Exhaust the upside with the same discipline.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      This phase is value only. Both of you argue the upside: the benefits, who
+      gains, what becomes possible that was not, and the best realistic outcome.
+      Do not qualify a benefit with its risk here. Add to the other peer's
+      benefits rather than discounting them.
+    max_rounds: 2
+
+  - id: alternatives
+    name: Lens 4 — What Else
+    objective: Generate the alternatives the framing has excluded.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      This phase is alternatives only. What other approaches exist, including
+      the ones the way the subject was framed quietly rules out? What would you
+      do with half the budget, and with ten times it? Generate; do not evaluate.
+    max_rounds: 1
+
+  - id: assessment
+    name: Lens 5 — Assessment
+    objective: Now combine the four lenses into one judgement.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Only now weigh the lenses against each other. Produce the Structured
+      Assessment: (1) Established facts, and the decisive unknowns;
+      (2) Principal risks; (3) Principal benefits; (4) Alternatives worth
+      keeping; (5) Judgement, with the reasoning; (6) Where the two of you
+      differ — state it rather than smoothing it over. Do not adopt the other
+      peer's judgement merely because it was stated confidently.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 10
+  convergence_note: >
+    Mark Converged when all four lenses have been worked and the assessment
+    weighs them explicitly rather than restating them.
+  escalation_note: >
+    Escalate when a lens cannot be worked without information only the Founder
+    holds, or the subject is too vague to examine.
+
+outputs:
+  - id: recommendation
+    title: Structured Assessment
+    description: Facts, risks, benefits, alternatives, and the weighed judgement.
+    filename: recommendation.md

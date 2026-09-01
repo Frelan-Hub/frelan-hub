@@ -1,0 +1,109 @@
+# Brainstorm — Diverge → Cluster → Rank (FORMATS.md format 1).
+# The entry-point meeting type: generate widely, then organise, then prioritise.
+# Equitable by design: symmetric peer roles, turn order alternates per phase.
+# Set the subject via the startup Topic Injection prompt.
+
+id: frelan-brainstorm-001
+name: Brainstorm
+objective: >
+  Generate, organise, and prioritise ideas for the subject described by the
+  Founder at session start, ending in a ranked idea backlog.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For opening up a subject before committing to anything. Widens the field
+    first, then clusters and ranks, ending in a prioritised idea backlog.
+  author: FRELAN
+  version: "1.0"
+  template_version: "1.0"
+  meeting_type: brainstorm
+  format: "1 - Diverge, Cluster, Rank"
+  peer_scoring: "true"
+
+capabilities:
+  - id: ideation
+    description: Generate many distinct options without prematurely judging them.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [ideation, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [ideation, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: diverge
+    name: Independent Divergence
+    objective: Each peer generates ideas alone, before seeing any other idea.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Generate at least twelve distinct ideas for the mission objective. Favour
+      range over polish: include at least three that are unconventional or
+      uncomfortable. One line each, no justification, no ranking. Do not
+      critique, and do not reference the other peer.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: cluster
+    name: Clustering
+    objective: Merge both idea sets into named themes with duplicates removed.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Merge both idea sets. Group them into named themes, collapse duplicates,
+      and keep every distinct idea somewhere — do not silently drop one because
+      it is weak. Name any theme that only one peer produced.
+    max_rounds: 2
+
+  - id: rank
+    name: Criteria & Ranking
+    objective: Agree ranking criteria, then rank the themes and the top ideas.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      First state the two or three criteria that should decide priority here
+      (e.g. impact, effort, reversibility) and agree them. Then rank the themes
+      and the strongest ideas within each. Do not agree with the other peer
+      merely because they spoke first — where you still disagree on a ranking,
+      say so and give the reason.
+    max_rounds: 2
+
+  - id: backlog
+    name: Idea Backlog
+    objective: Produce the ranked backlog.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Produce the Idea Backlog with these sections: (1) Ranked Ideas — each with
+      its theme, a one-line rationale, and its criteria scores; (2) Parked —
+      ideas worth keeping but not now, with why; (3) Discarded — with why;
+      (4) Unresolved Disagreements — any ranking the two of you did not settle.
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged when the backlog is ranked and any remaining disagreement is
+    recorded as a documented trade-off rather than an open argument.
+  escalation_note: >
+    Escalate when the subject is too ambiguous to generate against, or the
+    ranking depends on a business constraint only the Founder knows.
+
+outputs:
+  - id: recommendation
+    title: Idea Backlog
+    description: Ranked ideas with themes, criteria, parked items, and discards.
+    filename: recommendation.md

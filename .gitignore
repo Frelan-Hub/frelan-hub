@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+.env
+.coverage
+htmlcov/
+*.egg-info/
+
+# Runtime artifacts
+outputs/
+evidence-log.jsonl
+*.log
+
+# Local/agent tooling
+.claude/
+.agents/
+AI Conductor Architecture/
+
+# Local machine files
+*.lnk
+*.local.*
+.DS_Store
+Thumbs.db
+
+# User/local data
+inputs/
+*_Chrome_Profile/
+chrome_profile/
+
+# Private documents
+docs/AI-Conductor-Pitch-Deck.*
+docs/AI-Conductor-Report.*
+docs/logs/

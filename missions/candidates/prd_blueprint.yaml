@@ -1,0 +1,288 @@
+# PRD & Build Blueprint — the full pre-implementation document set for an app
+# or tool, written to be handed to a coding agent rather than read once.
+#
+# FOUR DELIVERABLES, FOUR SYNTHESIS TURNS. This template declares four outputs,
+# so the runtime issues one synthesis turn per document instead of asking for
+# all four in one reply. That is the whole reason the set can be detailed: a
+# browser reply is the ceiling on a deliverable, and four documents sharing one
+# reply are four summaries. Do not collapse the outputs block to save turns.
+#
+# The document skeletons live in outputs[].description, NOT in a phase's
+# instructions — the synthesis prompt carries the output description and does
+# not carry phase instructions. Each description uses a literal '|' scalar:
+# folded '>' collapses the newlines and flattens the skeleton onto one line
+# (a real run proved this on workspace_preparation.yaml).
+#
+# Equitable by design: symmetric peer roles, duties rotate per phase, turn order
+# alternates so no engine permanently anchors or closes. Claude may join as a
+# third peer via the standard startup prompt / --claude flag.
+#
+# Set the actual app or tool via the startup Topic Injection prompt.
+
+id: frelan-prd-blueprint-001
+name: PRD & Build Blueprint
+objective: >
+  Produce the complete pre-implementation document set for the app or tool
+  described by the Founder at session start — product requirements, technical
+  blueprint, phased build plan, and an agent brief ready to hand to a coding
+  agent — so that implementation can begin without further discovery.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For an app idea already settled in principle. Produces the full
+    pre-implementation document set in one run — PRD, technical blueprint,
+    phased build plan, and a brief ready to hand to a coding agent.
+  author: FRELAN
+  version: "1.0"
+  meeting_type: prd_blueprint
+  template_version: "1.0"
+  format: "2 - Independent Proposals, Cross-Challenge, Merge"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+  - id: architecture
+    description: Design system structure, boundaries, and technology choices.
+  - id: implementation.code
+    description: Ground plans in implementable code and data structures.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, architecture, implementation.code]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, architecture, implementation.code]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: product_framing
+    name: Product Framing
+    objective: Agree what problem this solves, for whom, and what success means.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      The mission objective IS the product — even a bare name or one line is
+      enough. State your interpretation in one line and proceed; never spend
+      the round asking the Founder to restate it. Establish: the problem and
+      who has it, the primary user and the job they are hiring this tool to do,
+      the two or three measurable signals that would show it works, and the
+      explicit non-goals — the things a reasonable reader would assume are in
+      scope and are not. Name the open questions that would most change the
+      product, and answer them with your best assumption rather than leaving
+      them open. Do not propose a stack, an architecture, or a schema yet.
+    max_rounds: 1
+
+  - id: scope_and_stories
+    name: Independent Scope & User Stories
+    objective: Each peer independently writes the story set and the MVP cut line.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Independently write the user stories for this product in the form
+      "As a <user>, I can <action>, so that <outcome>", each with two to four
+      testable acceptance criteria phrased so that passing or failing is
+      observable. Then draw the MVP cut line explicitly: which stories ship in
+      version one, which are deferred, and what the deferral costs. Include at
+      least one failure or edge-case story — what happens when input is
+      invalid, the network is gone, or the user does the wrong thing. Do not
+      reference the other peer's scope.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: technical_proposals
+    name: Independent Technical Proposals
+    objective: Each peer independently proposes stack, structure, and data model.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Independently propose the technical shape: the stack and why this one
+      rather than the obvious alternative, the component boundaries and what
+      crosses them, the data model (entities, keys, relationships, and what is
+      NOT stored), the key interfaces or API surface, and the target file tree.
+      Ground every choice in a requirement or a story rather than in taste, and
+      say which choice you would most expect to regret. Write file trees and
+      schemas as plain indented text, never inside code fences. Do not
+      reference the other peer's proposal.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: cross_challenge
+    name: Cross-Challenge
+    objective: Stress-test scope and structure; duties are reciprocal.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Challenge the other peer's scope and technical proposal on the specific
+      steps of the reasoning, not only the conclusion: scope creep hiding in a
+      story, an acceptance criterion that cannot actually be checked, data
+      integrity, migration and failure paths, cost, and complexity that has not
+      earned its place. Say which stories should be cut from version one and
+      why. Then defend or amend your own where it was challenged, and concede
+      where the other peer is right. Do not converge merely because the other
+      peer agreed — state where you still disagree and what evidence would
+      move you.
+    max_rounds: 2
+
+  - id: blueprint_merge
+    name: Blueprint Merge
+    objective: Converge on one scope, one architecture, and one build sequence.
+    participant_ids: [chatgpt, gemini]  # turn order rotated
+    instructions: >
+      Merge the strongest surviving elements into ONE agreed blueprint: final
+      story set with the MVP cut line, final architecture and data model, the
+      phased build order, and the test strategy. Every phase in the build order
+      must end with a runnable, testable application, however simple, and must
+      take one capability from data through logic to interface rather than
+      building all of one layer first. State each phase's exit criteria in
+      checkable terms. Record the top three risks with a concrete mitigation
+      each, and state plainly what remains unresolved rather than papering over
+      it — the four deliverables are written from this phase, so anything left
+      vague here is vague in the documents.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 10
+  # ChatGPT holds the pen: it produced the longest sustained turns on record
+  # here (24-29k chars), and its adapter clicks "Continue generating" when a
+  # long document pauses at the token cap. This is a data choice, not a
+  # structural one — change it when the evidence changes.
+  synthesiser: chatgpt
+  convergence_note: >
+    Mark Converged only once the peers agree on one story set with an explicit
+    MVP cut line, one architecture and data model, and one phased build order
+    whose every phase ends in a runnable app with checkable exit criteria.
+    Remaining disagreement is acceptable only where it is a documented
+    trade-off the Founder can decide. Converging produces four documents in
+    four separate turns, so expect the synthesis to take several minutes.
+  escalation_note: >
+    Escalate when a product decision only the Founder can make — the actual
+    users, the budget, a platform constraint, an existing system that must be
+    integrated — blocks the scope or the stack.
+
+outputs:
+  - id: prd
+    title: Product Requirements Document
+    filename: prd.md
+    description: |
+      The product contract: what is being built, for whom, and how anyone can
+      tell it worked. Written for a reader who has not seen the discussion.
+      Sections, in this order:
+
+      # Product Requirements Document
+      ## Summary
+      (what this is, in three or four sentences)
+      ## Problem & Users
+      (the problem, the primary user, the job being hired for)
+      ## Goals & Success Metrics
+      (two to four measurable signals)
+      ## Non-Goals
+      (what is deliberately excluded, and why)
+      ## User Stories
+      (each: story in "As a / I can / so that" form, then its acceptance
+      criteria as a checkable list; group under MVP and Deferred)
+      ## Functional Requirements
+      ## Non-Functional Requirements
+      (performance, reliability, security, accessibility, operability —
+      each with a number or a threshold wherever one is meaningful)
+      ## Assumptions & Open Questions
+      (each open question with the assumption being made in its absence)
+  - id: blueprint
+    title: Technical Blueprint
+    filename: technical-blueprint.md
+    description: |
+      How the product is built: the decisions an implementer would otherwise
+      have to re-derive. Write file trees, schemas, and signatures as plain
+      indented text — never inside code fences. Sections, in this order:
+
+      # Technical Blueprint
+      ## Architecture Overview
+      (components, boundaries, and what crosses them)
+      ## Stack & Rationale
+      (each choice: what, why this rather than the alternative considered,
+      and what it costs)
+      ## Data Model
+      (entities, fields, keys, relationships, and what is deliberately not
+      stored; include the schema as indented text)
+      ## Interfaces
+      (API surface, module contracts, or CLI signatures — enough to code
+      against)
+      ## File Tree
+      (the target repository layout, indented, with a one-line purpose per
+      significant file or directory)
+      ## Cross-Cutting Concerns
+      (configuration, secrets handling, error handling, logging, testing
+      approach)
+      ## Risks & Mitigations
+      (the top risks, each with severity and one concrete mitigation)
+  - id: build_plan
+    title: Phased Build Plan
+    filename: build-plan.md
+    description: |
+      The delivery sequence: small, gated phases that each end in a runnable
+      application. Every phase takes one capability from data through logic to
+      interface; no phase builds a layer in isolation, and no phase is entered
+      before the previous one's exit criteria pass. Sections, in this order:
+
+      # Phased Build Plan
+      ## Delivery Principles
+      (the progressive-delivery, vertical-slice, and strict-gate rules as they
+      apply to this project specifically)
+      ## Phase 0 — Environment & Scaffold
+      (what must exist before any feature work; what is deliberately not set
+      up yet)
+      ## Phase 1..N — <name>
+      (each: Goal — Deliverables — Exit Criteria. Keep each phase small enough
+      to be a single achievable increment, and order them foundation → data
+      model → one working slice → remaining slices → hardening → packaging,
+      adapted to this project)
+      ## Milestone Gates
+      (a table: Phase — What must work before continuing)
+      ## Definition of Done
+      (project-wide completion criteria: builds cleanly, each story's
+      acceptance criteria pass, invalid input is rejected, no regressions,
+      usable without workarounds)
+  - id: agent_brief
+    title: Agent Brief
+    filename: agent-brief.md
+    description: |
+      The document a coding agent is given to start building — pasted into a
+      frontier model as its operating brief, not read by a human. It must be
+      self-contained and directive: an agent that reads only this file should
+      know what to build, in what order, and when to stop. Assume it can read
+      prd.md, technical-blueprint.md, and build-plan.md alongside it, and refer
+      to them by filename rather than restating them. Sections, in this order:
+
+      # Agent Brief
+      ## Mission
+      (one paragraph: what you are building and what "done" means)
+      ## Operating Rules
+      (the invariants that hold for every task: what must never be changed,
+      what must never be invented, what to do when something is ambiguous,
+      and when to stop and ask rather than guess)
+      ## Repository Layout
+      (where things go, as indented text)
+      ## Task Sequence
+      (one numbered block per build-plan phase, each written as a directive
+      task the agent can execute: what to build, which files to touch, and
+      the acceptance criteria that close it)
+      ## Verification
+      (the exact commands to run after each phase — build, test, lint — and
+      what a pass looks like)
+      ## Do Not
+      (the specific mistakes this project invites: premature abstraction,
+      out-of-scope features, deferred stories, dependencies not in the
+      blueprint)

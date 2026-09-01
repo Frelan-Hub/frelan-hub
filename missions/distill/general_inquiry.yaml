@@ -1,0 +1,98 @@
+# General Inquiry Meeting — the light-weight default for open questions.
+# Equitable by design: symmetric peer roles, turn order alternates between the
+# two phases. Deliberately short (4 rounds) — this is the meeting type for
+# "answer this" rather than "design/decide this". Ask the actual question via
+# the startup Topic Injection prompt.
+
+id: frelan-general-inquiry-001
+name: General Inquiry
+objective: >
+  Answer the question or request posed by the Founder at session start with one
+  consolidated answer that separates established fact from inference.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    The light-weight default for open questions — four rounds, no design or
+    decision machinery. Use it when you want an answer, not a plan.
+  author: FRELAN
+  version: "1.0"
+  meeting_type: general_inquiry
+  template_version: "1.0"
+  format: "6 - Extract, Reconcile, Structure"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible answer.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable answer.
+  - id: research.web
+    description: Gather, cite, and weigh external evidence and sources.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, research.web]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, research.web]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: answers
+    name: Independent Answers
+    objective: Each peer answers the Founder's question independently.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      The mission objective above IS the question — even if it is a bare phrase
+      or a single word, interpret it in the most useful way, state your
+      interpretation in one line, and answer it. Never spend the round asking
+      the Founder to restate the question. Answer directly and completely:
+      lead with the answer, then the reasoning that supports it. Label each
+      claim as established fact (with a source where one exists) or your own
+      inference. If the honest answer is "unknown", say so and say what would
+      settle it. Do not reference the other peer's answer.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: reconcile
+    name: Reconcile and Consolidate
+    objective: Resolve disagreement and produce one consolidated answer.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Compare the two answers. State plainly where you agree, where you
+      disagree and why, and concede where the other peer is better supported.
+      Then converge on ONE consolidated answer: the answer itself, the caveats
+      that genuinely matter, and anything that remains unknown. Keep it
+      proportionate to the question — do not inflate a short answer into a
+      report.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 4
+  convergence_note: >
+    Mark Converged as soon as the peers agree on one answer, or the remaining
+    disagreement is stated explicitly in the consolidated answer. A general
+    inquiry is expected to end early; running the full round budget is a sign
+    the question belongs in a heavier meeting type.
+  escalation_note: >
+    Escalate when the question cannot be answered without a decision, a
+    private fact, or a constraint only the Founder holds.
+
+outputs:
+  - id: recommendation
+    title: Consolidated Answer
+    description: One answer, with caveats and remaining unknowns stated.
+    filename: recommendation.md

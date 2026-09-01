@@ -1,0 +1,108 @@
+# Research Deep-Dive Meeting — independent findings, cross-examination, brief.
+# Equitable by design: symmetric peer roles, reciprocal examination, and turn
+# order alternates. Fewer phases, more rounds — depth over ceremony.
+
+id: frelan-research-deepdive-001
+name: Research Deep-Dive
+objective: >
+  Investigate the question posed by the Founder at session start and produce
+  an evidence-backed decision brief.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For an open question that needs investigating before anything can be
+    decided. Peers gather findings independently, cross-examine them, and
+    produce an evidence-backed decision brief.
+  author: FRELAN
+  version: "1.0"
+  meeting_type: research_deepdive
+  template_version: "1.0"
+  format: "6 - Extract, Reconcile, Structure"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+  - id: research.web
+    description: Gather, cite, and weigh external evidence and sources.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, research.web]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, research.web]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: findings
+    name: Independent Findings
+    objective: Each peer researches the question independently, with sources.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      The mission objective above IS the research subject — even if it is a
+      bare name or short phrase, treat it as "research this comprehensively"
+      and proceed; never stall the round asking for a fuller question (note
+      any ambiguity in one line, state your interpretation, and research it).
+      Independently present your findings on that subject. Cite every claim to
+      a resolvable source — title, publisher, and date or URL — and state each
+      source's reliability. Separate established facts from your own inference.
+      If you cannot produce a real citation, write "uncited" and say so; never
+      invent a source, an author, or a date. Do not reference the other peer's
+      findings.
+    max_rounds: 2
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: cross_examination
+    name: Cross-Examination
+    objective: Reciprocally test sources, assumptions, and reasoning.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Examine the other peer's findings: check that each citation is real and
+      says what it is claimed to say, question source quality, surface
+      contradicting evidence, and expose unstated assumptions. Challenge the
+      reasoning steps, not only the conclusion. Then answer the examination of
+      your own findings. Concede where the evidence is against you — but do not
+      concede merely because the other peer pressed the point; say where you
+      still disagree and what evidence would move you.
+    max_rounds: 3
+
+  - id: brief
+    name: Decision Brief
+    objective: Synthesize surviving evidence into a decision brief.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Jointly converge on the decision brief: what is established, what remains
+      uncertain, what you recommend, and what evidence would change the
+      recommendation.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 10
+  convergence_note: >
+    Mark Converged when the peers agree on the evidence and recommendation, or
+    the remaining uncertainty is explicitly quantified in the brief.
+  escalation_note: >
+    Escalate when access to evidence, scope ambiguity, or conflicting
+    authoritative sources need the Founder's judgement.
+
+outputs:
+  - id: recommendation
+    title: Research Decision Brief
+    description: Evidence-backed brief with recommendation and open uncertainties.
+    filename: recommendation.md

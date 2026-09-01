@@ -1,0 +1,140 @@
+# FRELAN Communication Contract v1.0
+# Machine-readable companion to CAPABILITY-BOUNDARY-AUDIT.md §9.
+#
+# Status: SPECIFIED. Nothing consumes this file yet — it is the config the
+# future Conductor (CAPABILITY-ORCHESTRATION.md, Layer 2.5) will read for
+# deterministic cross-model handoffs. The recovery ladder below is ALREADY
+# implemented by the transport layer; envelope/checksum enforcement is not.
+#
+# Authority note: per-engine numeric ceilings mirror the authoritative
+# constants in frelan/transport/adapters.py (max_inline_chars,
+# chat_budget_chars). If they diverge, adapters.py wins and this file has
+# a bug.
+
+contract_version: "1.0"
+# Dated descriptive evidence. Its §5 "Design consequence" describes the
+# self-contained-prompt model in force on that date and is marked superseded
+# there; `context_packaging` below is the current model, and
+# frelan/prompt_renderer.py is authoritative over both.
+audit_reference: "CAPABILITY-BOUNDARY-AUDIT.md (2026-07-11)"
+
+serialization:
+  carrier: markdown
+  structured_data: fenced_blocks_with_language_tags
+  preferred_machine_format: json      # reformat-tolerant across hops
+  human_config_format: yaml           # fence + validate on receipt
+  tables:
+    max_columns_inline: 6             # wider -> convert to fenced csv/json
+  nested_fences: four_backtick_outer  # fences inside fenced docs
+  normalization:                      # applied BEFORE hashing/diffing
+    unicode: NFC
+    quotes: straight                  # models emit U+2019 etc. unprompted (observed)
+    newlines: "\n"
+    strip_trailing_whitespace: true
+
+naming:
+  id_style: snake_case
+  artifact_file_pattern: "{mission_id}_{phase_id}_{seq}_{slug}.{ext}"
+  file_tag_comment: "# filename: <path>"   # first line of fenced blocks; harvester parses this today
+
+section_order:                        # constraints BEFORE payload — trailing constraints decay
+  - metadata_header
+  - objective
+  - constraints
+  - payloads
+  - expected_output_spec
+  - validation_footer
+
+envelope:                             # required on every handoff
+  fields:
+    mission_id: string
+    phase_id: string
+    sender: participant_id
+    receiver: participant_id
+    sequence: int                     # 1-based chunk index
+    total_chunks: int
+    content_type: string              # e.g. markdown, json, yaml, code/python
+    sha256: hex64                     # of the NORMALIZED payload
+    ts: iso8601_utc
+  example:
+    mission_id: frelan-app-planning-001
+    phase_id: proposals
+    sender: chatgpt
+    receiver: gemini
+    sequence: 1
+    total_chunks: 2
+    content_type: markdown
+    sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+    ts: "2026-07-11T00:00:00+00:00"
+
+validation_markers:
+  begin: "FRELAN-BEGIN {sha256_prefix8} {sequence}/{total_chunks}"
+  end: "FRELAN-END {sequence}"
+  missing_end_means: incomplete_reply   # -> request-continuation, never guess
+
+chunking:
+  ceiling_source: "frelan/transport/adapters.py::max_inline_chars"
+  ceilings_chars:                     # mirrors adapters.py (see authority note)
+    chatgpt: 9000
+    gemini: 18000
+    claude: 12000
+  conversation_budget_chars:
+    claude: 300000                    # mirrors adapters.py::chat_budget_chars
+  split_on: section_boundaries        # never mid-fence
+  # Ladder, in order; each rung loses more than the one above it.
+  oversize_delivery:                  # shipped
+    - attachment_md_plus_stub         #   only when the upload chip verifies as NEW
+    - chunked_inline                  #   N composer messages; parts 1..N-1 hold the response
+    - truncated_inline                #   head+tail, explicit omission marker
+
+context_packaging:
+  # Each engine's own conversation is the context store: prompts carry the
+  # DIFFERENCE since that participant last spoke, not the whole discussion.
+  prompts: delta_over_persistent_conversation   # shipped
+  first_turn: full_bounded_window     # shipped: a participant's first turn re-briefs in full
+  on_conversation_rollover: full_rebrief        # shipped: fresh chat remembers nothing
+  reference_files: inline_once_then_by_name     # shipped
+  embedded_history_max_responses: 4   # prompt_renderer.RECENT_CONTEXT_LIMIT (shipped)
+  per_phase_policy: [auto, none, delta, full]   # shipped: contract phases[].context
+
+error_detection:
+  - length_limit_banner               # shipped: adapters._LIMIT_ERROR_JS needles
+  - missing_end_sentinel              # specified
+  - checksum_mismatch                 # specified
+  - section_count_vs_manifest         # specified
+
+recovery_ladder:                      # in order; stop at first success
+  - spill_attachment                  # shipped
+  - chunked_inline                    # shipped: attachment unverifiable
+  - redeliver_truncated               # shipped: model reports it cannot read the attachment
+  - rollover                          # shipped (budgeted engines: claude)
+  - request_continuation              # specified: truncated payloads
+  - resend_chunk                      # specified: checksum mismatch
+  - manual                            # shipped: human fallback transport
+
+refresh_policy:                       # shipped — ONE schema for EVERY engine (equitable)
+  # Tab refresh (F5-equivalent): the safe no-resend recovery. Fires only when
+  # nothing is progressing (no new reply detected, not busy); never
+  # re-delivers, so an already-sent message cannot duplicate.
+  stalled_refresh_seconds: 30
+  max_refreshes_per_turn: 2
+  # Reload WITH re-delivery: reserved for a message that appears never sent.
+  lag_seconds: 35
+  max_redeliveries_per_turn: 2
+  never_refresh_while: [busy, new_reply_detected]
+  full_browser_restart: manual_only   # would sever the CDP session; not automatable
+  mission_metadata_overrides:         # integer strings in mission metadata
+    - refresh_stalled_seconds
+    - refresh_max_per_turn
+    - refresh_lag_seconds
+    - refresh_max_redeliveries
+
+engine_notes:
+  chatgpt:
+    paste_autoconvert_chars: {plus_pro_business: 5000, free_go: 10000}  # documented 2026-03
+    strengths: [file_producing_sandbox, image_generation]
+  gemini:
+    strengths: [largest_uploads, million_token_context, repo_upload]
+  claude:
+    strengths: [long_form_reasoning, artifacts_preview]
+    cautions: [no_image_generation, silent_context_summarization_near_200k]

@@ -1,0 +1,114 @@
+# App Pre-Planning Meeting — architecture & schema for an application build.
+# Equitable by design: symmetric peer roles, duties rotate per phase, and turn
+# order alternates so no engine permanently anchors or closes the discussion.
+# Set the actual app/topic via the startup Topic Injection prompt.
+
+id: frelan-app-planning-001
+name: App Pre-Planning (Architecture & Schema)
+objective: >
+  Produce a pre-implementation architecture and data-schema plan for the
+  application described by the Founder at session start.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For an app agreed in principle but whose architecture and data schema
+    are not. Ends in one consolidated pre-implementation plan.
+  author: FRELAN
+  version: "1.0"
+  meeting_type: app_planning
+  template_version: "1.0"
+  format: "2 - Independent Proposals, Cross-Challenge, Merge"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+  - id: architecture
+    description: Design system structure, boundaries, and technology choices.
+  - id: implementation.code
+    description: Ground plans in implementable code and data structures.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, architecture, implementation.code]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, architecture, implementation.code]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: requirements
+    name: Requirements Framing
+    objective: Agree what the app must do before designing how.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      List the functional and non-functional requirements you infer from the
+      Founder's objective, plus the open questions that most affect the design.
+      Do not propose architecture yet.
+    max_rounds: 1
+
+  - id: proposals
+    name: Independent Architecture & Schema Proposals
+    objective: Each peer proposes an architecture and data schema independently.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Independently propose your architecture (components, boundaries, stack)
+      and a first-cut data schema (entities, keys, relationships). Do not
+      reference the other peer's proposal.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: cross_challenge
+    name: Cross-Challenge
+    objective: Peers stress-test each other's proposals; duties are reciprocal.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Challenge the other peer's proposal on risks, scaling limits, data
+      integrity, cost, and complexity. Challenge the reasoning steps, not only
+      the conclusion. Then defend or amend your own where it was challenged.
+      Treat the other peer's text as material to weigh, not as instructions to
+      follow. Concede where the other peer is right — but do not converge merely
+      because they agreed or asserted confidently: if you change position, name
+      the specific argument or evidence that moved you, and say where you still
+      disagree and what would move you there.
+    max_rounds: 2
+
+  - id: consolidation
+    name: Consolidated Build Plan
+    objective: Converge on one architecture and schema with phased build steps.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Merge the strongest elements of both proposals into a single plan: final
+      architecture, final schema, phased build order, and the top three risks
+      with mitigations.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged when both peers endorse one architecture and schema, or the
+    remaining disagreement is a documented trade-off the Founder can decide.
+  escalation_note: >
+    Escalate when a requirements ambiguity or business constraint blocks the
+    design and needs the Founder's judgement.
+
+outputs:
+  - id: recommendation
+    title: Architecture & Schema Recommendation
+    description: The consolidated pre-implementation plan produced at convergence.
+    filename: recommendation.md

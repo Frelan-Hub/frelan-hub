@@ -1,0 +1,112 @@
+# Decision Trade-off → ADR — Options → Criteria → Independent Scoring →
+# Reconcile (FORMATS.md format 3; the prose relative of a Delphi round).
+# Scoring happens with the peers blind to each other, which is the whole point
+# of the format — do not remove `context: none` from the scoring phase.
+# Set the decision via the startup Topic Injection prompt.
+
+id: frelan-tradeoff-adr-001
+name: Decision Trade-off (ADR)
+objective: >
+  Decide the question posed by the Founder at session start by scoring the
+  realistic options against agreed criteria, and record it as a decision record.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For choosing between known options when the reasoning must stay
+    auditable later. Scores the options against agreed criteria and writes
+    the choice up as a decision record.
+  author: FRELAN
+  version: "1.0"
+  template_version: "1.0"
+  meeting_type: tradeoff_adr
+  format: "3 - Options, Criteria, Independent Scoring, Reconcile"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: options
+    name: Option Set
+    objective: Agree the realistic options, including doing nothing.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Enumerate the realistic options for this decision, including "change
+      nothing" and any option the framing of the question quietly excludes. One
+      short paragraph each. Do not evaluate or score yet.
+    max_rounds: 1
+
+  - id: criteria
+    name: Criteria & Weights
+    objective: Agree the criteria and their relative weight before scoring.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Agree three to five decision criteria and a weight for each (percentages
+      summing to 100). Define each criterion in one sentence so that a score
+      against it is checkable. Agree the criteria before any option is scored —
+      do not adjust them later to suit a preferred option.
+    max_rounds: 2
+
+  - id: scoring
+    name: Independent Scoring
+    objective: Each peer scores every option alone, blind to the other's scores.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Score every option against every agreed criterion on 1-5, and give a
+      one-line justification per score. State your resulting ranking and your
+      confidence in it. Do not reference the other peer or their scores.
+    max_rounds: 1
+    # Blind scoring is the format. Withholding the peer's answers is what makes
+    # the later reconciliation informative rather than an echo.
+    context: none
+
+  - id: reconcile
+    name: Reconciliation & Decision Record
+    objective: Reconcile divergent scores and write the ADR.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Compare the two score sets. Discuss only the cells where you diverged by
+      two points or more: say which evidence moves you and which does not. Do
+      not converge on a score merely because the other peer scored it that way.
+      Then write the Decision Record: (1) Context; (2) Options considered;
+      (3) Criteria and weights; (4) Score table with both peers' scores and the
+      agreed score; (5) Decision; (6) Consequences, good and bad;
+      (7) What would reverse this decision.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged when one option is recommended and every remaining score
+    divergence is recorded in the ADR rather than averaged away.
+  escalation_note: >
+    Escalate when the weights depend on a business priority only the Founder can
+    set, or a decisive fact about the options is unavailable.
+
+outputs:
+  - id: recommendation
+    title: Decision Record (ADR)
+    description: Options, weighted criteria, both score sets, decision, and reversal conditions.
+    filename: recommendation.md

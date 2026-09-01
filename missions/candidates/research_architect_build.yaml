@@ -1,0 +1,189 @@
+# Research → Architect → Build — a WORKFLOW expressed as data, not as code.
+#
+# This template exists to demonstrate one thing: a multi-stage workflow is
+# authored as labelled phases inside an ordinary Mission Contract. There is no
+# workflow engine, no R-A-B branch in the interpreter, and nothing here that the
+# runtime special-cases. Rename the stages, drop one, add a fifth — the runtime
+# neither knows nor cares.
+#
+# It is also the library's first user of `interaction: parallel`, in the
+# research stage: both peers are prompted from the same round-start state and
+# their replies are collected afterwards, so they genuinely research at the same
+# time and neither can see the other's findings in that round.
+#
+# STATUS: candidate, and `parallel` is EXPERIMENTAL — implemented and
+# unit-tested, but not yet evidenced by a live browser run. See
+# CONCEPTUAL-MODEL.md §5 before relying on it.
+#
+# Set the thing to be researched, designed, and built via the startup Topic
+# Injection prompt.
+
+id: frelan-research-architect-build-001
+name: Research, Architect, Build
+objective: >
+  Take the subject the Founder supplies at session start from open research
+  through an agreed architecture to a sequenced build plan, keeping the research
+  independent and the architecture genuinely contested before anything is
+  committed to.
+metadata:
+  summary: >
+    A four-stage workflow for turning an idea into a build plan: parallel
+    independent research, contested architecture, a build sequence, then an
+    independent review of both.
+  author: FRELAN
+  version: "1.0"
+  template_version: "1.0"
+  meeting_type: research_architect_build
+  format: "workflow - Research / Architecture / Build / Validation"
+  # The workflow this contract composes. Free text: the runtime reads it only to
+  # record and display it, so naming a workflow never constrains the phases.
+  workflow: research-architect-build
+  peer_scoring: "true"
+
+capabilities:
+  - id: research.web
+    description: Gather, cite, and weigh external evidence and sources.
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: architecture
+    description: Design a structure and justify its boundaries and trade-offs.
+  - id: implementation.code
+    description: Turn an agreed design into concrete, sequenced build work.
+  - id: validation.independent
+    description: Check work against its stated intent without having produced it.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    # `type: model` is the default and is stated here only because this template
+    # is the worked example. A contract that says nothing means exactly this.
+    type: model
+    assigned_engine:
+      role: peer_analyst
+      # Identical to the other peer's: equal peers declare equal capability.
+      # A capability says what a participant CAN do; which of them exercises
+      # which is decided by the phase, not by a permanently narrower seat.
+      required_capabilities: &peer_capabilities
+        - research.web
+        - reasoning.strategic
+        - architecture
+        - implementation.code
+        - validation.independent
+        - critique
+        - synthesis
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    type: model
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: *peer_capabilities
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: research
+    name: Stage 1 — Research
+    stage: research
+    objective: Establish independently what is actually known about the subject.
+    participant_ids: [chatgpt, gemini]
+    # Parallel: both peers are prompted before either reply is collected, so
+    # they work at the same time. `context: none` is the separate decision that
+    # they are told nothing of each other — the two together are what make this
+    # stage two genuinely independent investigations rather than one echo.
+    interaction: parallel
+    context: none
+    instructions: >
+      Research the subject independently. Report what is established, with
+      sources, and label every line as FACT (checkable, cited) or INFERENCE
+      (yours, with what it rests on). Name the decisive unknowns. Do not
+      reference the other peer — you have not seen their work and they have not
+      seen yours. Breadth first: it is more useful here to surface five
+      considerations shallowly than one deeply.
+    max_rounds: 1
+
+  - id: architecture
+    name: Stage 2 — Architecture
+    stage: architecture
+    objective: Contest and settle the structure before anything is built on it.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    interaction: sequential
+    instructions: >
+      Both research reports are now in front of you. Propose the structure you
+      believe is right, then attack the other peer's proposal on its weakest
+      real point rather than its easiest one. Name the boundaries, what each
+      part owns, and the trade-off each boundary buys. State explicitly where
+      you concede. Do not converge early: an agreement reached in round one is
+      usually agreement about the wrong thing.
+    max_rounds: 2
+
+  - id: build
+    name: Stage 3 — Build
+    stage: build
+    objective: Turn the settled architecture into sequenced, checkable work.
+    participant_ids: [chatgpt, gemini]
+    interaction: sequential
+    instructions: >
+      Produce the build sequence for the architecture as it now stands — not for
+      the one you argued for. For each step: what is built, what it depends on,
+      and how you would know it works. Order by dependency, not by preference.
+      Flag any step that the research stage showed rests on a decisive unknown.
+    max_rounds: 2
+
+  - id: validation
+    name: Stage 4 — Validation
+    stage: validation
+    objective: Check the architecture and the build plan against the research.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    interaction: sequential
+    instructions: >
+      Review both the architecture and the build plan against the research
+      stage's findings, as an independent check rather than as a co-author.
+      State plainly: what the plan claims that the research does not support;
+      what the research surfaced that the plan ignores; and which single step is
+      most likely to fail first. This is a review phase, not a gate — nothing is
+      blocked by it, so say what you actually find.
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 2
+  max_rounds: 12
+  synthesiser: chatgpt
+  convergence_note: >
+    Mark Converged when the architecture is settled, the build plan is ordered
+    by dependency, and the validation stage's objections have been answered or
+    explicitly accepted as risks.
+  escalation_note: >
+    Escalate when the research stage's decisive unknowns cannot be resolved
+    without a decision, a private fact, or a budget only the Founder holds.
+
+outputs:
+  - id: architecture
+    title: Architecture
+    description: |
+      The settled structure and the reasoning behind it. Write it as a finished
+      document, not as a summary of the discussion:
+
+      1. What is being built, in two sentences.
+      2. The structure — each part, what it owns, and what it must not know.
+      3. Each boundary, and the trade-off it buys.
+      4. Alternatives considered and why they were not taken.
+      5. Decisive unknowns that could still change this, from the research stage.
+      6. Where the two peers did not agree, stated rather than smoothed over.
+    filename: architecture.md
+  - id: build_plan
+    title: Build Plan
+    description: |
+      The sequenced build, ordered by dependency. Write it as a finished
+      document:
+
+      1. The sequence, numbered, each step naming what it builds.
+      2. For each step: dependencies, and how you would know it works.
+      3. The step most likely to fail first, and what that would look like.
+      4. Anything the validation stage objected to that was accepted as a risk.
+    filename: build-plan.md

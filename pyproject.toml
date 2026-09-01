@@ -1,0 +1,19 @@
+[project]
+name = "ai-conductor-b-runtime"
+version = "0.1.0"
+description = "AI-Conductor B Runtime — the browser engine. A generic runtime that executes an immutable, declarative Mission Contract and moderates a structured discussion between browser-based AI models."
+requires-python = ">=3.12"
+dependencies = [
+    "PyYAML>=6.0",
+    "pyperclip>=1.8",
+    "playwright>=1.40.0",
+    "streamlit>=1.30.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Make `import frelan` work without an editable install (keeps the MVP one-command runnable).
+pythonpath = ["."]

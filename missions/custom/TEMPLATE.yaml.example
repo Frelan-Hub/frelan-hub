@@ -1,0 +1,107 @@
+# Custom meeting-type template.
+#
+# HOW TO USE
+#   1. Copy this file to missions/custom/<your_name>.yaml
+#      (the ".example" suffix is what keeps THIS file out of the menu — a real
+#       .yaml/.yml here is discovered automatically and listed as [custom]).
+#   2. Edit the marked fields. Every key below is required except where noted;
+#      the loader reports all problems at once, so run it early and often.
+#   3. Validate without launching a run:
+#        python -c "from frelan.mission_loader import load_mission; print(load_mission('missions/custom/<your_name>.yaml').name)"
+#   4. Run it: python main.py  ->  pick it from the menu, or type its path.
+#
+# RULES THAT MATTER (MISSION-CONTRACT.md is authoritative)
+#   - participant_ids in a phase must exist in participants.
+#   - required_capabilities must exist in capabilities.
+#   - outputs[].filename must be a bare filename, never a path.
+#   - metadata values are strings: quote booleans ("true"), not true.
+#   - Rotate participant_ids between phases so no engine always speaks last.
+#   - Do not hard-code your subject here. Leave the objective generic and give
+#     the real subject at startup via Topic Injection (FORMATS.md §B.7).
+
+id: my-custom-meeting-001            # unique; any stable string
+name: My Custom Meeting              # the label shown in the menu
+objective: >
+  One sentence describing what this meeting type produces, phrased so that the
+  actual subject arrives from the Founder at session start.
+metadata:
+  author: FRELAN
+  version: "1.0"
+  # Shown under the meeting-type menu so you can tell your templates apart.
+  # `objective` above states the goal; this says when to reach for it.
+  summary: >
+    One or two sentences on what this meeting type is for and when to pick it
+    over the others.
+  meeting_type: my_custom_meeting    # the key evidence/--report aggregates on
+  peer_scoring: "true"               # quoted on purpose
+  group: custom                      # optional; overrides the folder tag
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible position.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable output.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+  # Claude is NOT declared here. Add it per run with --claude or the menu's
+  # "third peer" question, which injects it into every phase.
+
+phases:
+  - id: independent
+    name: Independent Positions
+    objective: Each peer answers on its own, without seeing the other.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      What each peer should do this phase, and what it must NOT do yet.
+      Phase-gating ("do not propose a solution yet") is what keeps the
+      independent phase independent.
+    max_rounds: 1                    # optional; omit for governance-bounded
+
+  - id: challenge
+    name: Cross-Challenge
+    objective: Peers stress-test each other, then defend or concede.
+    participant_ids: [gemini, chatgpt]   # turn order rotated on purpose
+    instructions: >
+      Challenge the other peer's position on its weakest points, then answer
+      the challenge to your own. Concede where the other peer is right.
+    max_rounds: 2
+
+  - id: consolidate
+    name: Consolidation
+    objective: Converge on one output.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Merge the strongest surviving elements into a single result, and state
+      what remains unresolved.
+    max_rounds: 2
+
+governance:
+  checkpoint_interval: 1             # checkpoint menu every N completed rounds
+  max_rounds: 8                      # optional hard cap across all phases
+  # synthesiser: gemini              # optional; defaults to the first participant
+  convergence_note: >
+    What "done" looks like for this meeting type.
+  escalation_note: >
+    What only the Founder can unblock.
+
+outputs:
+  - id: recommendation
+    title: Recommendation
+    description: What this file contains.
+    filename: recommendation.md      # bare filename, written into the run dir

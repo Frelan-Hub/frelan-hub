@@ -1,0 +1,79 @@
+# Example Mission Contract — a moderated ChatGPT-vs-Gemini debate.
+# Conforms to MISSION-CONTRACT.md. The Founder is the transport: prompts are
+# copied to the clipboard, pasted into each browser tab, and responses pasted
+# back into the CLI.
+
+id: frelan-debate-001
+name: FRELAN Structured Debate
+objective: >
+  Should we focus on building a premium custom CRM platform from scratch for our
+   5   architecture business, or should we use an off-the-shelf platform like Salesforce
+   6   with custom integrations?
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    Legacy example contract, kept only as the fallback default. A two-peer
+    debate on a fixed CRM question — prefer a library template for real
+    work.
+  author: FRELAN
+  version: "1.0"
+  # Quoted deliberately: the loader coerces metadata to strings, so an unquoted
+  # YAML `true` becomes "True" and fails the `== "true"` gate.
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning
+    description: Produce structured, step-by-step argumentation.
+  - id: critique
+    description: Identify weaknesses and counter-arguments in a position.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: proposer
+      required_capabilities: [reasoning]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: critic
+      required_capabilities: [reasoning, critique]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: positions
+    name: Opening Positions
+    objective: Each engine states its initial position with reasoning.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      State your position on the Founder's question in no more than five
+      concise points. Do not rebut the other engine yet.
+    max_rounds: 1
+
+  - id: rebuttal
+    name: Rebuttal and Refinement
+    objective: Engines challenge and refine each other's positions.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Respond directly to the strongest point the other engine made. Concede
+      where they are right; sharpen where they are wrong.
+    max_rounds: 4
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 6
+  convergence_note: >
+    Mark Converged only when both engines have substantially aligned or the
+    trade-off is clear enough to recommend.
+  escalation_note: >
+    Escalate if the engines are deadlocked on a point that needs the Founder's
+    domain judgement.
+
+outputs:
+  - id: recommendation
+    title: Final Recommendation
+    description: The synthesized recommendation produced at convergence.
+    filename: recommendation.md

@@ -1,0 +1,105 @@
+# Website / Design Review Meeting — concept, UX critique, content and stack.
+# Equitable by design: symmetric peer roles, duties rotate per phase, and turn
+# order alternates. Inject reference images at startup for visual context.
+
+id: frelan-website-design-001
+name: Website / Design Review
+objective: >
+  Converge on a design direction, content structure, and technology approach
+  for the website described by the Founder at session start.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For settling the direction of a website before build work starts —
+    visual direction, content structure, and technology stack in one pass.
+  author: FRELAN
+  version: "1.0"
+  meeting_type: website_design
+  template_version: "1.0"
+  format: "2 - Independent Proposals, Cross-Challenge, Merge"
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+  - id: analysis.vision
+    description: Reason about visual design, layout, and reference imagery.
+  - id: documentation
+    description: Structure content, information architecture, and copy.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, analysis.vision, documentation]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, critique, synthesis, analysis.vision, documentation]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: concepts
+    name: Concept Directions
+    objective: Propose distinct design directions before any critique.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Independently propose two distinct concept directions: audience, tone,
+      layout approach, typography/colour intent, and signature moments. Use any
+      injected reference images as grounding. Do not critique the other peer yet.
+    max_rounds: 1
+
+  - id: design_critique
+    name: Design & UX Critique
+    objective: Reciprocal critique of the proposed directions.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Critique the other peer's directions: hierarchy, usability, accessibility,
+      brand fit, and feasibility. Then defend or refine your own directions
+      where challenged. Concede where the other peer is right.
+    max_rounds: 2
+
+  - id: content_stack
+    name: Content, IA & Stack Review
+    objective: Ground the surviving direction in content structure and technology.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      For the strongest surviving direction, propose the information
+      architecture and page inventory, then the technology stack with
+      performance and SEO considerations. Challenge each other's choices
+      reciprocally.
+    max_rounds: 2
+
+  - id: direction
+    name: Direction Recommendation
+    objective: Converge on one direction with a build outline.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      Merge into one recommended direction: the concept, IA, stack, and a
+      phased build outline with the main risks.
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged when both peers endorse one direction, or the remaining
+    choice is a documented aesthetic trade-off for the Founder.
+  escalation_note: >
+    Escalate when brand, budget, or audience questions block the direction and
+    need the Founder's judgement.
+
+outputs:
+  - id: recommendation
+    title: Design Direction Recommendation
+    description: The converged design direction, IA, and stack outline.
+    filename: recommendation.md

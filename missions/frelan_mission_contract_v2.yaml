@@ -1,0 +1,117 @@
+
+# FRELAN Mission Contract v2.0
+# AI Conductor orchestration contract for ChatGPT Browser and Gemini Browser.
+
+id: frelan-planning-001
+name: FRELAN Collaborative Planning
+objective: >
+  Collaborative pre-planning mission where ChatGPT and Gemini independently
+  reason, challenge each other, iteratively improve, and produce a
+  synthesized recommendation.
+
+metadata:
+  author: FRELAN
+  version: "2.0"
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    transport_provider: browser
+    execution_engine: chatgpt
+    capabilities:
+      - reasoning
+      - challenge
+      - revision
+      - synthesis
+
+  - id: gemini
+    display_name: Gemini
+    transport_provider: browser
+    execution_engine: gemini
+    capabilities:
+      - reasoning
+      - challenge
+      - revision
+      - synthesis
+
+execution:
+
+  max_cycles: 3
+
+  rounds_per_cycle:
+    minimum: 2
+    maximum: 3
+
+  phases:
+
+    - id: proposal
+      name: Independent Proposal
+      behavior: propose
+      participants: [chatgpt, gemini]
+      instructions: >
+        Independently produce your solution without referencing the other
+        participant's response.
+
+    - id: cross_challenge
+      name: Cross Challenge
+      behavior: challenge
+      participants: [chatgpt, gemini]
+      mode: reciprocal
+      instructions: >
+        Review the other participant's proposal. Identify assumptions, risks,
+        missing considerations, strengths, and possible improvements.
+
+    - id: revision
+      name: Revision
+      behavior: revise
+      optional: true
+      participants: [chatgpt, gemini]
+      trigger: unresolved_disagreements
+      instructions: >
+        Improve your own proposal using the feedback received while preserving
+        your strongest arguments.
+
+cycle_health_check:
+  performed_by: conductor
+
+  responsibilities:
+    - summarize_cycle
+    - detect_convergence
+    - detect_context_drift
+    - detect_contradictions
+    - compress_context
+    - recommend_continue_or_stop
+
+  preserve:
+    - agreed_facts
+    - key_evidence
+    - unresolved_questions
+    - remaining_tradeoffs
+    - action_items
+
+  discard:
+    - greetings
+    - duplicated_arguments
+    - repetitive_reasoning
+    - obsolete_context
+
+governance:
+
+  stop_conditions:
+    - convergence
+    - max_cycles
+    - founder_intervention
+    - insufficient_new_information
+
+outputs:
+  - id: cycle_summary
+    filename: cycle-summary.md
+    description: Compressed summary carried into the next cycle.
+
+  - id: recommendation
+    filename: recommendation.md
+    description: Final synthesized recommendation.
+
+  - id: debate_log
+    filename: debate-log.md
+    description: Complete transcript retained for auditing only.

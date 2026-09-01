@@ -1,0 +1,214 @@
+# Capability Discovery — optional pre-planning ecosystem research.
+#
+# Read-only by construction: this mission RESEARCHES an ecosystem and emits a
+# profile. It installs nothing, configures nothing, and probes no local
+# software. Discovery never changes the system; execution does — and execution
+# belongs to the future CLI/Local Conductors, not to the Browser Conductor.
+#
+# WHY THIS LIVES IN missions/pre-planning/ AND NOT missions/:
+#   main.py::_discover_meeting_types globs "missions/*.y*ml" NON-recursively to
+#   build the interactive meeting-type menu. A contract placed directly in
+#   missions/ would silently appear as a new numbered menu entry and renumber
+#   the existing ones — a change to existing Browser Conductor behaviour. This
+#   subdirectory is invisible to that glob, so the menu is untouched. Discovery
+#   is a pre-planning STAGE, not a meeting type; the placement says so.
+#
+# Each peer owns one research lane (its own phase + instructions), then all
+# three cross-validate, then they merge. The merge block is parsed by
+# frelan/discovery.py into capability-profile.yaml.
+#
+# NOTE ON THE WORD "capability": the `capabilities:` block below is the Mission
+# Contract sense (what a model can DO — CAPABILITY-ORCHESTRATION.md §4). The
+# things being discovered (SDKs, MCP servers, extensions) are a DIFFERENT sense
+# of the word. See CAPABILITY-DISCOVERY.md "Naming collision".
+
+id: frelan-capability-discovery-001
+name: Capability Discovery
+objective: >
+  Discover the ecosystem — tooling, SDKs, libraries, servers, and runtime
+  requirements — required to build the project named by the Founder at session
+  start, and merge the findings into a single capability profile for review.
+metadata:
+  author: FRELAN
+  version: "1.0"
+  meeting_type: capability_discovery
+  group: pre-planning
+
+capabilities:
+  - id: research.web
+    description: Gather, cite, and weigh external evidence and sources.
+  - id: research.repository
+    description: Locate and assess source repositories, packages, and registries.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: claude
+    display_name: Claude
+    assigned_engine:
+      role: peer_researcher
+      required_capabilities: [research.web, research.repository, critique, synthesis]
+      transport_provider: browser
+      execution_engine: claude
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_researcher
+      required_capabilities: [research.web, research.repository, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_researcher
+      required_capabilities: [research.web, research.repository, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  # Lanes are separate single-participant phases so each engine gets its OWN
+  # instructions. Note: the renderer always injects prior responses into every
+  # prompt, so later lanes DO see earlier ones. Independence is enforced by
+  # instruction, exactly as missions/research_deepdive.yaml already does — the
+  # renderer is not modified. Because the lanes are disjoint DOMAINS, overlap
+  # is mostly harmless and actually helps the merge stage.
+  - id: lane_claude
+    name: Claude Ecosystem Lane
+    objective: Research the Anthropic/Claude ecosystem for this project.
+    participant_ids: [claude]
+    instructions: >
+      The mission objective above IS the project — even if it is a bare name or
+      short phrase, treat it as "discover what this project needs" and proceed;
+      never stall asking for a fuller brief (note any ambiguity in one line,
+      state your interpretation, and research it).
+      Research ONLY your lane: Claude Plugins, Claude Skills, MCP Servers,
+      Connectors, the wider Claude ecosystem, and Anthropic tooling. Recommend
+      nothing outside that lane; the other peers own the other lanes, so do not
+      duplicate their scope. For each recommendation give a name, what it is, a
+      source URL, and one line on why this project needs it. Separate what you
+      verified from what you are inferring. Recommend only — never give install
+      commands or setup steps; this stage does not change any machine.
+    max_rounds: 1
+
+  - id: lane_chatgpt
+    name: OpenAI / Tooling Lane
+    objective: Research SDKs, APIs, frameworks, and developer tooling.
+    participant_ids: [chatgpt]
+    instructions: >
+      Research ONLY your lane: SDKs, APIs, frameworks, VSCode extensions, other
+      development tools, and the OpenAI ecosystem. Recommend nothing outside
+      that lane. For each recommendation give a name, what it is, a source URL,
+      a version constraint where one matters, and one line on why this project
+      needs it. Separate what you verified from what you are inferring.
+      Recommend only — never give install commands or setup steps; this stage
+      does not change any machine.
+    max_rounds: 1
+
+  - id: lane_gemini
+    name: Open-Source Lane
+    objective: Research open-source libraries, repositories, and alternatives.
+    participant_ids: [gemini]
+    instructions: >
+      Research ONLY your lane: open-source libraries, GitHub repositories,
+      community best practices, alternative tooling, and emerging ecosystems.
+      Recommend nothing outside that lane. Prefer battle-tested projects over
+      novel ones, and say plainly which are experimental. For each
+      recommendation give a name, what it is, a source URL, and one line on why
+      this project needs it. Separate what you verified from what you are
+      inferring. Recommend only — never give install commands or setup steps;
+      this stage does not change any machine.
+    max_rounds: 1
+
+  - id: validate
+    name: Cross-Validation
+    objective: Test every lane's findings for accuracy, overlap, and risk.
+    participant_ids: [chatgpt, gemini, claude]
+    instructions: >
+      Examine the other lanes' recommendations. Flag anything unmaintained,
+      deprecated, hallucinated, or simply non-existent — name it explicitly.
+      Flag duplicates and overlaps across lanes, version incompatibilities, and
+      anything that is a genuine risk to adopt. Concede where the evidence is
+      against your own lane. Do not add new recommendations in this phase.
+    max_rounds: 2
+
+  - id: merge
+    name: Capability Report
+    objective: Merge the surviving recommendations into one capability profile.
+    participant_ids: [claude]
+    # NOTE: literal '|' scalar, NOT folded '>'. YAML folding collapses newlines
+    # into spaces, which flattened this whole template onto one line in a live
+    # run and made the emitted block unparseable. Keep '|' here forever.
+    instructions: |
+      Produce the merged Capability Report for the Founder to review. Include
+      only recommendations that survived cross-validation, with duplicates
+      collapsed into a single entry.
+
+      Then, at the very end of your response, emit the machine-readable profile
+      between the two sentinel lines shown below.
+
+      FORMAT RULES — follow exactly, they exist because of a real failure:
+      - Emit the sentinel lines as PLAIN TEXT, each alone on its own line.
+      - Do NOT use markdown code fences, bullets, bold, or ANY indentation.
+        Your response is harvested from the rendered page, which strips fences
+        and every leading space. Indented output is silently destroyed.
+      - One "key: value" per line, starting at column 1.
+      - Separate each recommendation with a line containing only: ---
+      - Every record MUST have both a `category:` and a `name:` line.
+      - `status:` is one of: recommended, optional, experimental, risk.
+      - Omit `version:` if no constraint matters. Omit categories you have
+        nothing for. Invent a new `category:` value if something genuinely fits
+        none of the listed ones.
+
+      Valid `category:` values: claude_ecosystem, openai_ecosystem,
+      gemini_open_source, sdks, apis, frameworks, libraries, mcp_servers,
+      connectors, vscode_extensions, cli_tools, runtime_requirements,
+      local_services, optional_components, experimental_components, risks,
+      version_compatibility.
+
+      Emit exactly this shape, with one record per real finding:
+
+      BEGIN-CAPABILITY-PROFILE
+      project: <one line naming the project>
+      ---
+      category: claude_ecosystem
+      name: <name>
+      kind: <mcp_server|plugin|skill|connector|sdk|library|framework|api|extension|cli_tool|runtime|service>
+      source: <url>
+      version: <constraint, or omit this line>
+      status: <recommended|optional|experimental|risk>
+      rationale: <one line on why this project needs it>
+      ---
+      category: sdks
+      name: <next finding>
+      kind: <kind>
+      source: <url>
+      status: <status>
+      rationale: <why>
+      END-CAPABILITY-PROFILE
+    max_rounds: 1
+
+governance:
+  # 3 = one checkpoint exactly after the three research lanes finish, before
+  # cross-validation spends turns on them. The real approval gate is the
+  # Founder review of capability-profile.yaml after the mission ends.
+  checkpoint_interval: 3
+  max_rounds: 8
+  convergence_note: >
+    Mark Converged once the merged profile covers every lane, duplicates are
+    collapsed, and each risk is either resolved or explicitly recorded. The
+    profile is informational — approving it commits nothing and installs
+    nothing.
+  escalation_note: >
+    Escalate when the project scope is too ambiguous to research, or when the
+    lanes disagree on a foundational choice that the Founder must settle before
+    the profile means anything.
+
+outputs:
+  - id: capability_report
+    title: Capability Report
+    description: >
+      Human-readable merged ecosystem research for Founder review. The
+      machine-readable half is capability-profile.yaml.
+    filename: capability-report.md

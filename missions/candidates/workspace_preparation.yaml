@@ -1,0 +1,285 @@
+# Workspace Preparation Meeting — recommend the optimal development workspace
+# BEFORE implementation begins.
+#
+# ADVISORY ONLY, by construction: this meeting recommends how the user should
+# manually configure their coding environment (Skills, Plugins, Connectors,
+# MCP Servers, docs, tooling). It never enables, installs, or configures
+# anything — the Conductor stays a planning and recommendation system.
+#
+# TARGET ENVIRONMENT: metadata.target_environment names the builder the
+# recommendation is for. Today that is Claude Code. Supporting another builder
+# later (Gemini CLI, a local LLM, ...) is a copy of this file with a different
+# target_environment and adjusted category names in the instructions — a data
+# edit, never a code change. Nothing in the runtime reads the ecosystem names.
+#
+# Equitable by design like the other meeting types: symmetric peer roles,
+# turn order rotates per phase. Claude joins as a third peer via the standard
+# startup prompt / --claude flag. Set the actual project via Topic Injection.
+
+id: frelan-workspace-preparation-001
+name: Workspace Preparation
+objective: >
+  Recommend the optimal, leanest development workspace for building the
+  project described by the Founder at session start, so the Founder can
+  manually configure the target environment before any code is written.
+metadata:
+  # One-line "what this is for", shown under the meeting-type menu.
+  summary: >
+    For deciding the toolchain before any code is written. Recommends the
+    leanest workspace for a project and returns a manual setup report plus a
+    phased build plan.
+  author: FRELAN
+  version: "1.0"
+  meeting_type: workspace_preparation
+  template_version: "1.0"
+  format: "2 - Independent Proposals, Cross-Challenge, Merge"
+  target_environment: claude_code
+  peer_scoring: "true"
+
+capabilities:
+  - id: reasoning.strategic
+    description: Structured strategic reasoning toward a defensible plan.
+  - id: research.web
+    description: Gather, cite, and weigh external evidence and sources.
+  - id: critique
+    description: Identify weaknesses, risks, and missing considerations.
+  - id: synthesis
+    description: Consolidate positions into a single actionable recommendation.
+
+participants:
+  - id: chatgpt
+    display_name: ChatGPT
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, research.web, critique, synthesis]
+      transport_provider: browser
+      execution_engine: chatgpt
+  - id: gemini
+    display_name: Gemini
+    assigned_engine:
+      role: peer_analyst
+      required_capabilities: [reasoning.strategic, research.web, critique, synthesis]
+      transport_provider: browser
+      execution_engine: gemini
+
+phases:
+  - id: stack_framing
+    name: Stack & Scope Framing
+    objective: Agree what is being built and with what stack, before choosing tooling.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      The mission objective IS the project — even a bare name is enough; state
+      your interpretation in one line and proceed, never stall for a fuller
+      brief. Infer the likely tech stack, project scope, and MVP boundary,
+      because every workspace recommendation depends on them. Name the open
+      questions that most change the workspace (e.g. desktop vs web, which
+      media pipeline, which database). Do not recommend tooling yet.
+    max_rounds: 1
+
+  - id: proposals
+    name: Independent Workspace Proposals
+    objective: Each peer independently proposes the optimal workspace.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    instructions: >
+      The target environment is Claude Code. Independently propose the
+      workspace the Founder should prepare in it, covering: Claude Skills,
+      Claude Plugins, Claude Connectors, Claude MCP Servers, documentation
+      Claude should reference, frameworks, libraries, SDKs, APIs, development
+      tools (package manager, test framework, build tool, linter, formatter,
+      debugger), configuration files, and starter templates. Classify every
+      Skill/Plugin/Connector/MCP Server as Required, Recommended, or Optional,
+      and give every single item a one-line reason. Recommend only what is
+      genuinely useful for THIS project — do not list tools because they
+      exist. Do not reference the other peer's proposal. Recommend only:
+      never give install, enable, or configuration commands; the Founder
+      applies everything manually.
+    max_rounds: 1
+    # Instructions forbid referencing the peers, so the peers'
+    # answers are withheld rather than sent and ignored.
+    context: none
+
+  - id: lean_challenge
+    name: Lean-Workspace Challenge
+    objective: Stress-test every recommendation down to the minimum effective workspace.
+    participant_ids: [chatgpt, gemini]
+    instructions: >
+      Challenge the other peer's proposal item by item: Why is this needed?
+      Required or merely useful? Does it reduce development time? Does it add
+      unnecessary complexity or context size? Enable now, or later? Is there
+      a simpler alternative? Should it be omitted entirely? Argue for
+      REMOVING or DEFERRING anything not clearly earning its place — the goal
+      is the leanest effective workspace, not the fullest. Defend or concede
+      on your own items where challenged. Explicitly list what should NOT be
+      enabled and why. Do not add brand-new recommendations in this phase.
+    max_rounds: 2
+
+  - id: final_report
+    name: Workspace Preparation Report
+    objective: Converge on one lean workspace and write the final report.
+    participant_ids: [gemini, chatgpt]  # turn order rotated
+    # NOTE: literal '|' scalar, NOT folded '>'. Folding collapses newlines and
+    # flattens the template onto one line (a real run proved it). Keep '|'.
+    instructions: |
+      Merge the surviving recommendations into ONE consensus report — only
+      items that survived the lean-workspace challenge, each backed by the
+      discussion. Where you disagreed, record the resolution, not both sides.
+      Emit the report in exactly this structure (omit a section only if it is
+      genuinely empty for this project):
+
+      # Workspace Preparation Report
+
+      ## Executive Summary
+      (short explanation of the recommended workspace)
+
+      ## Required Skills / ## Recommended Skills / ## Optional Skills
+      (each item: Name — Reason — Priority)
+
+      ## Required Plugins / ## Recommended Plugins / ## Optional Plugins
+      (each item: Name — Reason — Priority)
+
+      ## Required Connectors / ## Recommended Connectors / ## Optional Connectors
+      (each item: Name — Reason — Priority)
+
+      ## Required MCP Servers / ## Recommended MCP Servers / ## Optional MCP Servers
+      (each item: Name — Reason — Priority)
+
+      ## Required Documentation
+      (Documentation — Reason)
+
+      ## Recommended Frameworks
+      (Framework — Reason)
+
+      ## Recommended Libraries
+      (Library — Reason)
+
+      ## Recommended SDKs
+      (SDK — Reason)
+
+      ## Recommended APIs
+      (API — Reason)
+
+      ## Recommended Development Tools
+      (Tool — Reason)
+
+      ## Required Configuration Files
+      (File — Reason)
+
+      ## Recommended Project Templates
+      (Template — Reason)
+
+      ## Workspace Risks
+      (everything that should NOT be enabled, and why — including anything
+      that would bloat context or add complexity without payoff)
+
+      ## Final Workspace Recommendation
+      (one concise, immediately actionable checklist the Founder can follow
+      manually when configuring the target environment)
+
+      The report is advisory: no install commands, no setup steps, no
+      configuration syntax — names and reasons only.
+    max_rounds: 1
+
+  # Runs AFTER the workspace report so the plan is grounded in the converged
+  # recommendation. Being last, this phase also carries the reciprocal peer
+  # scoring (the renderer gates scoring to phases[-1]).
+  - id: build_plan
+    name: Phased Build Plan
+    objective: >
+      Convert the final workspace recommendation into a phased, milestone-gated
+      delivery plan that maximises the chance of shipping a working app.
+    participant_ids: [chatgpt, gemini]  # turn order rotated
+    # NOTE: literal '|' scalar, NOT folded '>' — same reason as final_report.
+    instructions: |
+      The Workspace Preparation Report is now FIXED input. Do not add, remove,
+      or re-litigate any tool, library, or framework — if it is not in the
+      report it does not appear in the plan, and everything under Workspace
+      Risks stays deferred. Your job is execution strategy only: distribute the
+      build into small, manageable chunks with the highest probability of
+      producing a working application.
+
+      Apply these principles throughout:
+      - Progressive delivery: every phase must end with a runnable, testable
+        application, even if trivially simple.
+      - Vertical slices: take one capability from database to UI to logic
+        before starting the next; never "all backend first".
+      - Strict gates: a phase is entered only when the previous phase's exit
+        criteria pass; no dead code, no future-proofing before need.
+
+      If you speak first, draft the complete plan. If you speak second,
+      challenge sizing and ordering, fix anything that would leave a phase
+      without a runnable app, then emit the full refined consensus version —
+      the last emitted plan is the deliverable.
+
+      Write the plan out in full, in this phase, as plain markdown. Do not use
+      code fences anywhere — responses are read from the rendered page, which
+      strips them; use indented blocks or plain lists for folder trees and
+      snippets. The runtime asks for this plan again as its own deliverable in
+      a dedicated synthesis turn at convergence, so what you write here is the
+      version that turn is built from.
+
+      The plan must contain, in this order:
+
+      # Phased Build Plan
+      ## Development Philosophy
+      (the delivery principles above, adapted to this project)
+      ## Phase 0 — Workspace Preparation
+      (the report's Final Workspace Recommendation checklist, plus what is
+      deliberately NOT enabled)
+      ## Phase 1..N — <name>
+      (each phase: Goal — Deliverables — Exit Criteria. Keep phases small
+      enough that each is an achievable working increment; order them
+      foundation → data model → CRUD → validation → UI → core business
+      logic → primary deliverable/export → polish → performance → packaging,
+      adapted to this project)
+      ## Milestone Gates
+      (table: Phase — Must work before continuing)
+      ## Success Strategy
+      (the vertical-slice sequence for this project's capabilities)
+      ## Definition of Done
+      (project-wide completion criteria: builds cleanly, feature works
+      end-to-end, no regressions, invalid data rejected, usable without
+      workarounds)
+
+      The plan is advisory like the report: task descriptions and criteria
+      only — no install commands, no configuration syntax.
+    max_rounds: 1
+
+governance:
+  checkpoint_interval: 1
+  max_rounds: 8
+  convergence_note: >
+    Do NOT mark Converged at the Workspace Preparation Report checkpoint —
+    Continue, so the Phased Build Plan phase still runs. Mark Converged only
+    once BOTH deliverables exist: the lean workspace report (every item
+    Required/Recommended/Optional with a reason, exclusions under Workspace
+    Risks) AND a phased build plan whose every phase ends in a runnable app
+    with explicit exit criteria. Both are advisory; approving them configures
+    and installs nothing.
+  escalation_note: >
+    Escalate when the project scope or stack is too ambiguous to ground the
+    workspace, or when peers disagree on a foundational choice (e.g. desktop
+    framework) that the Founder must settle before tooling can be chosen.
+
+outputs:
+  # Two declared outputs means two synthesis turns, one per document, each
+  # wrapped in its own BEGIN-OUTPUT/END-OUTPUT sentinels. Both files are written
+  # by that path. (Until 2026-08-23 the build plan was routed through fenced
+  # artifact harvesting instead, which cannot survive the rendered-page read —
+  # it never once produced the file.)
+  - id: workspace_report
+    title: Workspace Preparation Report
+    description: >
+      The consensus advisory report the Founder follows to manually prepare
+      the target environment before implementation begins. Use the exact
+      section structure dictated in the Workspace Preparation Report phase,
+      from Executive Summary through to Final Workspace Recommendation.
+    filename: workspace-preparation-report.md
+  - id: build_plan
+    title: Phased Build Plan
+    description: >
+      The milestone-gated delivery plan derived from the final workspace
+      recommendation — small vertical-slice phases, each ending in a runnable
+      app with explicit exit criteria. Use the exact section structure dictated
+      in the Phased Build Plan phase, from Development Philosophy through to
+      Definition of Done.
+    filename: phased-build-plan.md
