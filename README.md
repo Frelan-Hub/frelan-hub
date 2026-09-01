@@ -377,7 +377,7 @@ On Windows, use the **AI-Conductor B** shortcut, or:
 .\run_ui.bat
 ```
 
-This updates the checkout, syncs dependencies, and opens `http://localhost:8501`. Elsewhere, or to skip the update step:
+This updates the checkout, syncs dependencies, and opens the dashboard in your browser — `http://localhost:8501`, or the next free port if 8501 is already taken. Elsewhere, or to skip the update step:
 
 ```bash
 uv run streamlit run streamlit_app.py

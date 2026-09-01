@@ -7,8 +7,8 @@ if errorlevel 1 exit /b 1
 
 call "%~dp0scripts\_update.bat"
 
-echo [AI-Conductor] Starting the dashboard - the URL is printed below, and
-echo                opens in your browser by itself. Close this window to stop.
+echo [AI-Conductor] Starting the dashboard - it will open automatically in
+echo                your browser. Close this window to stop.
 echo.
 
 rem .streamlit\config.toml keeps headless = true so that a server started by
@@ -19,8 +19,10 @@ rem
 rem Leaving headless unmasks two first-run interruptions, both turned off in
 rem .streamlit\config.toml rather than here: server.showEmailPrompt (Streamlit
 rem asks for an email address) and logger.hideWelcomeMessage (the "install
-rem Streamlit skills" nudge). No port is pinned - if 8501 is taken by anything
-rem else on the machine, Streamlit picks the next free one and prints it.
+rem Streamlit skills" nudge). hideWelcomeMessage also suppresses Streamlit's
+rem printed Local/Network URL, which is why the banner above promises only the
+rem browser tab - do not put a URL back into it. No port is pinned either: if
+rem 8501 is taken, Streamlit picks the next free one and opens the tab there.
 %RUNNER% -m streamlit run streamlit_app.py --server.headless=false
 
 endlocal

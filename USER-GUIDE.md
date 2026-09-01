@@ -117,7 +117,7 @@ Start-Process "chrome.exe" -ArgumentList "--remote-debugging-port=9223 --user-da
 Several ways to launch, all from the repository root:
 
 ```bash
-# The dashboard (§DASHBOARD.md) — updates, then opens http://localhost:8501
+# The dashboard (§DASHBOARD.md) — updates, then opens it in your browser
 .\run_ui.bat
 
 # Interactive CLI — shows the meeting-type menu (§5), then topic/file injection (§7)
