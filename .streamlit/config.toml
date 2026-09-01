@@ -4,6 +4,19 @@ gatherUsageStats = false
 [server]
 headless = true
 
+# Streamlit asks for an email address on first run, and skips that prompt when
+# headless. run_ui.bat deliberately runs non-headless so the browser tab opens
+# itself, which would otherwise put a prompt in front of a first-time user on
+# what is meant to be a one-click start.
+showEmailPrompt = false
+
+[logger]
+# Suppresses Streamlit's "install the official Streamlit skills" nudge, which
+# it shows when it detects an AI coding agent on the machine. Nothing here is
+# built by an agent at runtime, and this is a local control plane rather than
+# an app under development, so the nudge is noise.
+hideWelcomeMessage = true
+
 # Control-plane palette. The bronze is taken from the FRELAN mark; the ground is
 # kept near-black so live status colours read as signal rather than decoration.
 [theme]
