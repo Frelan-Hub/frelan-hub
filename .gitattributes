@@ -1,0 +1,10 @@
+# Batch files must arrive with CRLF, whatever the cloner's core.autocrlf is set
+# to. cmd.exe mis-parses multi-line blocks and labels in LF-only .bat files,
+# which would break the launchers for anyone who cloned with autocrlf disabled
+# or on a non-Windows machine.
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets, never line-ending converted.
+*.png binary
+*.ico binary

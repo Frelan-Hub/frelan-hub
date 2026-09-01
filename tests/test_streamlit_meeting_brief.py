@@ -10,15 +10,22 @@ objective silently swallowing the panel, or the fallback swallowing the text.
 
 from __future__ import annotations
 
+import pathlib
+
 from html import unescape
 
 from streamlit.testing.v1 import AppTest
 
 from ui import library
 
+# Streamlit 1.62 resolves a relative AppTest path against the *calling file*
+# rather than the working directory, which put the entry point in tests/.
+# An absolute path is correct under either behaviour.
+_APP = pathlib.Path(__file__).resolve().parent.parent / "streamlit_app.py"
+
 
 def _setup_view() -> AppTest:
-    app = AppTest.from_file("streamlit_app.py", default_timeout=120).run()
+    app = AppTest.from_file(str(_APP), default_timeout=120).run()
     app.session_state.page = "Setup"
     return app.run()
 

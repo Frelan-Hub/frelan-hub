@@ -12,11 +12,15 @@ run_ui.bat
 Or directly:
 
 ```bash
-.venv\Scripts\python.exe -m streamlit run streamlit_app.py
+uv run streamlit run streamlit_app.py
 ```
 
-`.streamlit/config.toml` sets `headless = true`, so the browser tab has to be
-opened explicitly — `run_ui.bat` does that for you at `http://localhost:8501`.
+`.streamlit/config.toml` sets `headless = true`, so a server started by other
+means never seizes a browser tab. `run_ui.bat` overrides that setting on the
+command line, because a launcher started by a human is exactly the case that
+should open one — Streamlit then opens `http://localhost:8501` itself, once the
+server is actually accepting requests. `run_ui.bat` also pulls any upstream
+changes before starting; set `AICB_NO_UPDATE=1` to skip that.
 
 ---
 

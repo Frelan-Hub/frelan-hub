@@ -266,38 +266,50 @@ Create a YAML contract in `missions/custom/<your_meeting>.yaml`. The runtime sca
 
 ### Prerequisites
 
-- **Python 3.12 or 3.13**
 - **Google Chrome** (for automated browser mode)
+- **Python 3.12 or 3.13** — not needed on Windows, where `install.bat` provides it
 
-### 1. Set Up Virtual Environment
+### Windows — One-Click Install
 
-```bash
-# Clone the repository
-git clone https://github.com/your-org/ai-conductor-b-runtime.git
-cd ai-conductor-b-runtime
-
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-# Windows (PowerShell):
-.venv\Scripts\Activate.ps1
-# macOS / Linux:
-source .venv/bin/activate
+```powershell
+git clone https://github.com/Frelan-Hub/frelan-hub.git
+cd frelan-hub
+.\install.bat
 ```
 
-### 2. Install Dependencies
+`install.bat` needs nothing installed beforehand, Python included. It installs [uv](https://docs.astral.sh/uv/), resolves the environment from `uv.lock`, fetches the Playwright Chromium driver, and creates an **AI-Conductor B** shortcut on the Desktop and Start Menu. Running it again is safe.
+
+**Updates run themselves.** `run_ui.bat` — and the shortcut that points at it — pulls upstream changes and re-syncs dependencies on each start. No Git, no network, or local edits in the way all leave the checkout untouched and start the app regardless. Set `AICB_NO_UPDATE=1` to skip.
+
+### macOS / Linux, or a Manual Windows Setup
 
 ```bash
+git clone https://github.com/Frelan-Hub/frelan-hub.git
+cd frelan-hub
+
+# With uv (recommended — manages the Python version too)
+uv sync
+uv run playwright install chromium
+
+# Or with plain pip
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### 3. Launch Chrome with Remote Debugging
+`pyproject.toml` is the canonical dependency declaration and `uv.lock` pins the resolution; `requirements.txt` is generated from the lock for the pip path.
+
+### Launch Chrome with Remote Debugging
 
 Before running in automated mode, launch Chrome with remote debugging on port `9223`:
 
 **Windows:**
+```powershell
+.\launch_chrome_debug.bat
+```
+
+or manually:
 ```powershell
 Start-Process "chrome.exe" -ArgumentList "--remote-debugging-port=9223 --user-data-dir=`"$env:TEMP\ai-conductor-b-chrome-profile`""
 ```
@@ -359,9 +371,27 @@ python main.py --prune-spills 14
 
 ### Launch Web Dashboard
 
-```bash
-streamlit run streamlit_app.py
+On Windows, use the **AI-Conductor B** shortcut, or:
+
+```powershell
+.\run_ui.bat
 ```
+
+This updates the checkout, syncs dependencies, and opens `http://localhost:8501`. Elsewhere, or to skip the update step:
+
+```bash
+uv run streamlit run streamlit_app.py
+```
+
+### Windows Launchers
+
+| Script | Does |
+|---|---|
+| `install.bat` | One-shot install; safe to re-run. `install.bat dev` adds test dependencies. |
+| `run_ui.bat` | Updates, then starts the dashboard. Target of the Desktop shortcut. |
+| `launch_chrome_debug.bat` | Starts Chrome on the CDP port, with sign-in instructions. |
+| `run_frelan.bat` | `python main.py`, with any extra flags passed through. |
+| `run_frelan_claude.bat` | `python main.py --claude`, with any extra flags passed through. |
 
 ---
 
@@ -415,12 +445,22 @@ ai-conductor-b-runtime/
 │   ├── shape/                     # Promoted architecture & planning templates
 │   ├── FORMATS.md                 # Facilitation pattern documentation
 │   └── LIBRARY.md                 # Template promotion register
+├── scripts/                       # Launcher support (not run directly)
+│   ├── _env.bat                   # Repo root + interpreter resolution
+│   ├── _update.bat                # Best-effort git pull & dependency sync
+│   └── new-shortcuts.ps1          # Desktop / Start Menu shortcut creation
 ├── tests/                         # Test suite
 ├── ui/                            # Streamlit dashboard modules
+├── install.bat                    # One-click Windows installer
+├── launch_chrome_debug.bat        # Chrome with the CDP debugging port
 ├── main.py                        # CLI entry point & composition root
-├── pyproject.toml                 # Package metadata & pytest config
-├── requirements.txt               # Dependency specifications
-└── streamlit_app.py               # Web dashboard entry point
+├── pyproject.toml                 # Canonical dependencies & pytest config
+├── requirements.txt               # Generated from uv.lock, for the pip path
+├── run_frelan.bat                 # CLI launcher
+├── run_frelan_claude.bat          # CLI launcher, Claude included
+├── run_ui.bat                     # Dashboard launcher (updates, then starts)
+├── streamlit_app.py               # Web dashboard entry point
+└── uv.lock                        # Pinned dependency resolution
 ```
 
 ---

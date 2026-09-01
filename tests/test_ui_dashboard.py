@@ -8,14 +8,21 @@ blind as soon as the runtime printed anything after its menu.
 
 from __future__ import annotations
 
+import pathlib
+
 import pytest
 from streamlit.testing.v1 import AppTest
 
 from ui import launcher, state, views
 
+# Streamlit 1.62 resolves a relative AppTest path against the *calling file*
+# rather than the working directory, which put the entry point in tests/.
+# An absolute path is correct under either behaviour.
+_APP = pathlib.Path(__file__).resolve().parent.parent / "streamlit_app.py"
+
 
 def _app(page: str = "Overview") -> AppTest:
-    app = AppTest.from_file("streamlit_app.py", default_timeout=120).run()
+    app = AppTest.from_file(str(_APP), default_timeout=120).run()
     app.session_state.page = page
     return app.run()
 

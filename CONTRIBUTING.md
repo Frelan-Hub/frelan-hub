@@ -11,6 +11,17 @@ Thank you for your interest in contributing to AI-Conductor B Runtime.
 
 ### Environment Setup
 
+With [uv](https://docs.astral.sh/uv/) — recommended, and what the Windows installer uses:
+
+```bash
+uv sync --extra dev              # Windows shortcut: install.bat dev
+uv run playwright install chromium
+```
+
+Prefix commands with `uv run` (`uv run python -m pytest`) or activate `.venv` as usual.
+
+Or with plain `pip`:
+
 1. Clone the repository and create a virtual environment:
    ```bash
    python -m venv .venv
@@ -23,8 +34,18 @@ Thank you for your interest in contributing to AI-Conductor B Runtime.
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
+   pip install pytest
    playwright install chromium
    ```
+
+### Dependencies
+
+`pyproject.toml` is canonical and `uv.lock` pins the resolution. `requirements.txt` is **generated** — never edit it by hand. After changing a dependency:
+
+```bash
+uv lock
+uv export --no-hashes --no-dev --format requirements-txt > requirements.txt
+```
 
 ## Running Tests
 

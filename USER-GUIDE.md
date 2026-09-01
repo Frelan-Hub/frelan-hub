@@ -48,33 +48,43 @@ Two governing principles shape everything below:
 
 ## 2. Prerequisites & Local Setup
 
-Requires **Python 3.12 or 3.13**.
+### Windows — one click
 
-### Step 1 — Virtual environment
+Double-click `install.bat`. Nothing needs to be installed first, Python included.
 
 ```powershell
-# Windows PowerShell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+.\install.bat          # add "dev" to include the test dependencies
+```
 
-# macOS / Linux
+It installs [uv](https://docs.astral.sh/uv/) (a single binary that manages both the Python version and the dependencies), installs Git if winget is available, resolves the environment from `uv.lock`, fetches Playwright's Chromium driver, and puts an **AI-Conductor B** shortcut on your Desktop and Start Menu.
+
+It is safe to run again. On a machine that already has everything, it is close to a no-op.
+
+**Updates are automatic.** `run_ui.bat` — and therefore the shortcut — pulls any upstream changes and re-syncs dependencies each time it starts. It is best-effort by design: no Git, no network, or local edits in the way all leave the checkout untouched and start the app anyway. Set `AICB_NO_UPDATE=1` to skip the check entirely.
+
+### macOS / Linux, or a manual Windows setup
+
+Requires **Python 3.12 or 3.13**.
+
+With uv:
+
+```bash
+uv sync
+uv run playwright install chromium
+```
+
+Or with plain `pip`:
+
+```bash
 python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### Step 2 — Install dependencies
-
-```bash
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-
-Core dependencies (from `pyproject.toml`): `PyYAML`, `pyperclip`, `playwright`. Dev/test: `pytest`.
-
-### Step 3 — Install Playwright's browser driver
-
-```bash
 playwright install chromium
 ```
+
+Core dependencies (from `pyproject.toml`): `PyYAML`, `pyperclip`, `playwright`, `streamlit`. Dev/test: `pytest`.
+
+> `pyproject.toml` is the canonical dependency declaration and `uv.lock` pins the resolution. `requirements.txt` is generated from the lock (`uv export --no-hashes --no-dev --format requirements-txt`) and exists only for the pip path — do not edit it by hand.
 
 ---
 
@@ -104,16 +114,21 @@ Start-Process "chrome.exe" -ArgumentList "--remote-debugging-port=9223 --user-da
 
 ## 4. Quick Start
 
-Three ways to launch, all from the repository root:
+Several ways to launch, all from the repository root:
 
 ```bash
-# Interactive — shows the meeting-type menu (§5), then topic/file injection (§7)
+# The dashboard (§DASHBOARD.md) — updates, then opens http://localhost:8501
+.\run_ui.bat
+
+# Interactive CLI — shows the meeting-type menu (§5), then topic/file injection (§7)
 python main.py
 
-# Windows convenience launchers (open a new terminal, then pause on exit)
+# Windows convenience launchers (pause on exit; any extra flags pass through)
 .\run_frelan.bat            # same as: python main.py
 .\run_frelan_claude.bat     # same as: python main.py --claude
 ```
+
+The `.bat` launchers work whether the machine was set up with `install.bat`, with `uv sync`, or with a hand-made `.venv` — they resolve the interpreter at startup and always run from the repository root, which is what keeps `missions\`, `inputs\` and `outputs\` resolving correctly no matter where the shortcut was invoked from.
 
 Everything from here — meeting type, engines included, topic, files — is chosen interactively unless you pass explicit flags (§6).
 
